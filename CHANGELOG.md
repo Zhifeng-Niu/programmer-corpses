@@ -58,7 +58,7 @@
 
 **重命名**
 - 从 "programmer-cemetery" → "programmer-corpses"
-- 原因："程序员"限定太窄，谁还没丢过代码
+- 原因：**程序员没死，代码死了** 🧟‍♂️
 
 **功能**
 - 🎲 每日扫墓
@@ -98,9 +98,12 @@
 
 | 版本 | 名字 | 原因 |
 |------|------|------|
-| v1.0 | programmer-cemetery | "程序员"限定太窄 |
-| v2.0 | programmer-corpses | "墓地"太忌讳 |
+| v1.0 | programmer-cemetery | "墓地"听起来像程序员死了 |
+| v2.0 | programmer-corpses | 改成"尸体"，代码是尸体 |
 | v3.0+ | code-corpses | 名字不重要，开心最重要 |
+
+**核心理念：**
+> 程序员没死，代码死了 🧟‍♂️
 
 > RIP 所有曾经的名字 —— 它们在 git log 里永垂不朽
 
