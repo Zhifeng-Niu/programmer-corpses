@@ -44,49 +44,13 @@
 | 🔄 **诈尸检测** | 旧代码被新项目复用 → 通知你 | 🧟 |
 | 📊 **摸鱼统计** | 丢了多少代码、诈尸多少次 | 📈 |
 | 🎁 **惊喜彩蛋** | 发现自己的代码诈尸了 | 🎉 |
-
----
-
-## 🎮 怎么玩
-
-### 方式 A：让 Agent 当墓地管理员
-
-```yaml
-# .coderagerc
-cemetery:
-  enabled: true
-  scan_interval: weekly
-  dead_threshold_days: 90
-  auto_archive: true
-  notify: telegram
-```
-
-Agent 自动：
-- 每周扫描 → 找到死代码 → 生成墓碑
-- 检测诈尸 → 旧代码被复用 → 通知你
-- 统计报告 → 发送到你的渠道
-
-### 方式 B：手动扫墓（摸鱼用）
-
-```bash
-# 随机看一个墓碑故事
-cemetery --visit
-
-# 看看你杀了多少代码
-cemetery --stats
-
-# 今天有代码忌日吗
-cemetery --anniversary
-
-# 彩蛋时间
-cemetery --egg REFACTOR
-```
+| ⚙️ **Agent 集成** | 让 Coding Agent 自动管理墓地 | 🤖 |
 
 ---
 
 ## 🚀 快速开始
 
-### 1. 装一下
+### 1. 安装
 
 ```bash
 npm install -g code-corpses
@@ -99,11 +63,16 @@ code-corpses init
 # 授权 GitHub → 设置扫描频率 → 搞定
 ```
 
-### 3. 忘记它 🧠
+### 3. 让 Agent 当墓地管理员
 
-Agent 自己干活：
-- 扫描 → 标记 → 归档 → 生成墓碑
-- 你什么都不用管
+Agent 会自动：
+- ✅ 定期扫描 → 找到死代码 → 生成墓碑
+- ✅ 检测诈尸 → 旧代码被复用 → 通知你
+- ✅ 统计报告 → 发送到你的渠道
+
+### 4. 忘记它 🧠
+
+**Human off the loop：** 授权一次，AI 自己搞定一切
 
 ---
 
