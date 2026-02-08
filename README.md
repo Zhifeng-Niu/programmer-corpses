@@ -1,266 +1,167 @@
-# 🪦 程序员墓地 - Programmer Cemetery
+# 🪦 Code Corpses - 代码尸体集中营
 
-> *"每一个被删除的 commit，都是对代码的一次缅怀。"*
+> *"这里的代码不是死了，只是等着被AI翻牌子"* 🧟‍♂️
 
-![墓地状态](https://img.shields.io/badge/status-诈尸中-purple?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
-![Node](https://img.shields.io/badge/Node.js-v16+-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-v2.0.0-诈尸版-red?style=for-the-badge)
-
----
-
-## 💀 这是什么鬼项目？
-
-**程序员墓地** —— 专门给那些"死掉"的代码建坟立碑的墓地管理系统。
-
-每一个被删除的 commit、每一个被废弃的功能、每一次"我们不用这个了"，都是一座墓碑。
-
-> ⚠️ **警告**: 进入此墓地后，你可能会想起那些不堪回首的代码黑历史。
+[![Vibe: Happy Coding](https://img.shields.io/badge/vibe-Happy%20Coding-purple?style=for-the-badge)]()
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
+[![Node](https://img.shields.io/badge/Node.js-v18+-green?style=for-the-badge)]()
 
 ---
 
-## ✨ 特性（诈尸版 v2.0）
+## 📜 名字的生前遗书
 
-| 特性 | 描述 | 诈尸指数 |
-|------|------|---------|
-| 🎲 **每日扫墓** | 每天随机展示一个"死亡"代码的故事 | 🪦 |
-| 📊 **墓地统计** | 统计代码存活时间、死亡原因等 | 📈 |
-| 🎂 **忌日提醒** | 死掉的日子会提醒你"缅怀" | 🕯️ |
-| 🔄 **诈尸检测** | 某些墓碑可以点击"复活" | 🧟 |
-| 🎁 **彩蛋模式** | 找到特定墓碑会有惊喜 | 🥚 |
+| 版本 | 名字 | 死因 |
+|------|------|------|
+| v1.0 | 🪦 **programmer-cemetery** | "程序员"限定太窄，谁还没丢过代码 |
+| v2.0 | 🪦 **programmer-corpses** | "墓地"太忌讳，但"尸体"够直白 |
+| v2.5+ | 🪦 **code-corpses** | 名字不重要，开心最重要 😄 |
 
----
-
-## 🚀 部署到 GitHub
-
-### 前置条件
-
-确保已安装 [GitHub CLI](https://cli.github.com/):
-
-```bash
-brew install gh
-```
-
-### 快速发布
-
-```bash
-# 1. 登录 GitHub（会打开浏览器）
-gh auth login --web
-
-# 2. 创建并推送仓库
-gh repo create programmer-cemetery \
-    --public \
-    --description "🪦 纪念那些死掉的代码 - 程序员墓地 CLI 工具" \
-    --source=. \
-    --push
-
-# 或者运行提供的脚本
-chmod +x setup-github.sh
-./setup-github.sh
-```
-
-### 手动发布（如果 prefer）
-
-```bash
-# 1. 在 GitHub 创建仓库: https://github.com/new
-#    仓库名: programmer-cemetery
-#    描述: 🪦 纪念那些死掉的代码
-
-# 2. 推送本地代码
-git remote add origin https://github.com/stbz/programmer-cemetery.git
-git branch -M main
-git push -u origin main
-```（3秒上手）
-
-### 方法1：直接运行（推荐）
-
-```bash
-# 克隆并运行
-git clone https://github.com/stbz/programmer-cemetery.git
-cd programmer-cemetery
-npx ts-node programmer-cemetery.ts --visit
-```
-
-### 方法2：全局安装
-
-```bash
-npm install -g programmer-cemetery
-cemetery --visit
-```
-
-### 方法3：Docker 扫墓（精神层面）
-
-```bash
-docker run --rm -it ghcr.io/stbz/programmer-cemetery:latest --visit
-```
+> RIP 所有曾经的名字 —— 它们在 git log 里永垂不朽
 
 ---
 
-## 🎮 命令手册
+## 💀 这是什么鬼？
 
-### 基础扫墓
+**AI 时代代码太多了，写完就丢，丢哪儿？**
+
+丢进 **代码尸体集中营** 🪦
+
+- 📦 你不管的代码 → AI 自动扫描 → 丢进墓地
+- 🔍 新项目需要功能 → AI 去墓地翻一翻 → 诈尸复用
+- 🧟 死掉的代码不是真死，只是等 AI 来捞
+
+> **核心哲学：** 墓地不是终点，是代码的"轮回中转站"
+
+---
+
+## ✨ 我们做什么
+
+| 功能 | 做什么 | 快乐指数 |
+|------|--------|---------|
+| 🤖 **AI 自动扫描** | 90天没动的代码 → 自动标记 | 🧠 |
+| 📥 **一键丢弃** | `gh code trash <file>` → 搞定 | 😌 |
+| 🏷️ **智能索引** | 给代码打标签 → 方便 AI 搜索 | 🔍 |
+| 🔄 **诈尸检测** | 旧代码被新项目复用 → 通知你 | 🧟 |
+| 📊 **摸鱼统计** | 丢了多少代码、诈尸多少次 | 📈 |
+| 🎁 **惊喜彩蛋** | 发现自己的代码诈尸了 | 🎉 |
+
+---
+
+## 🎮 怎么玩
+
+### 方式 A：让 Agent 当墓地管理员
+
+```yaml
+# .coderagerc
+cemetery:
+  enabled: true
+  scan_interval: weekly
+  dead_threshold_days: 90
+  auto_archive: true
+  notify: telegram
+```
+
+Agent 自动：
+- 每周扫描 → 找到死代码 → 生成墓碑
+- 检测诈尸 → 旧代码被复用 → 通知你
+- 统计报告 → 发送到你的渠道
+
+### 方式 B：手动扫墓（摸鱼用）
 
 ```bash
-# 🎲 随机访问一个墓碑（每日推荐）
+# 随机看一个墓碑故事
 cemetery --visit
 
-# 📊 查看墓地统计数据
+# 看看你杀了多少代码
 cemetery --stats
 
-# 🎂 查看今日忌日的墓碑
+# 今天有代码忌日吗
 cemetery --anniversary
+
+# 彩蛋时间
+cemetery --egg REFACTOR
 ```
 
-### 高级操作
+---
+
+## 🚀 快速开始
+
+### 1. 装一下
 
 ```bash
-# 🔄 检测墓碑能否复活
-cemetery --resurrect <id>
-
-# 🎁 触发彩蛋
-cemetery --egg REFACTOR    # 🔄 诈尸彩蛋
-cemetery --egg LEGACY      # 👴 老兵彩蛋
-cemetery --egg TODO        # 📝 摸鱼彩蛋
-cemetery --egg DOCS        # 📚 文档彩蛋
+npm install -g code-corpses
 ```
 
-### 设置每日自动扫墓（摸鱼神器）
+### 2. 配置 Agent（一次就好）
 
 ```bash
-# 每天早上 9 点自动扫墓（顺便摸鱼）
-0 9 * * * /usr/local/bin/cemetery --visit
+code-corpses init
+# 授权 GitHub → 设置扫描频率 → 搞定
 ```
+
+### 3. 忘记它 🧠
+
+Agent 自己干活：
+- 扫描 → 标记 → 归档 → 生成墓碑
+- 你什么都不用管
 
 ---
 
-## 🪦 今日墓碑预览
+## 🎯 快乐场景
 
-```
-🪦 今日扫墓
-────────────────────────────────────────────────--
-
-🎭 RegEx 验证码解析器
-   💀 死因: 被产品改成了滑块验证
-   ⏰ 享年: 2周
-   📜 墓志铭: "它曾经能识别99%的验证码，直到验证码学会了自我进化"
-   👮 凶手: 前端负责人Peter
-   📅 忌日: 2024-03-15
-
-🪦 最老墓碑: JQuery 分支 (12年) - RIP
-```
+| 场景 | 感受 |
+|------|------|
+| 打开仪表盘 → 看到"本月埋葬 12 个文件" | 😎 |
+| AI 通知："你的旧代码诈尸了" | 🧟‍♂️ |
+| 翻墓地发现 5 年前写的脚本被 AI 救活了 | ✨ |
+| 统计显示"累计复活代码: 99 次" | 🏆 |
 
 ---
 
-## 🎯 使用场景
+## 💬 一句话
 
-- ✅ 团队代码复盘会议的"鞭尸"环节
-- ✅ 技术分享会的"黑历史"专场
-- ✅ 纪念那些"差一点就上线"的功能
-- ✅ 记录职业生涯中的"翻车"现场
-- ✅ 单纯想给代码立个碑
-- ✅ 招聘面试时吓跑候选人
+> AI 时代，代码可以死很多次，但每次都能被捞回来 🔄
 
 ---
 
-## 🤝 如何贡献"墓碑"
+## 🤝 怎么参与
 
-想给你的代码也立个碑？请遵循以下仪式：
-
-### 添加新墓碑的步骤
-
-1. **Fork** 本仓库（给代码办一场法事）
-2. **创建分支**: `git checkout -b add-my-tombstone`
-3. **在 `cemetery` 数组中添加新的墓碑对象**:
-
-```typescript
-{
-  id: "unique-id",                    // 墓碑ID（要独一无二）
-  name: "墓碑名称",                    // 死者姓名
-  causeOfDeath: "死亡原因",            // 怎么死的
-  age: "存活时间",                     // 活了多久
-  epitaph: "墓志铭",                   // 临终遗言
-  killedBy: "凶手",                    // 谁杀的
-  dateOfDeath: "YYYY-MM-DD",          // 忌日
-  category: "feature" | "project" | "experiment" | "joke",
-  复活概率: 0-100,                     // 诈尸概率
-  emoji: "🎭"                          // 墓碑表情
-}
-```
-
-4. **提交**: `git commit -m '🪦 添加 XXX 墓碑 - R.I.P.'`
-5. **推送**: `git push origin add-my-tombstone`
-6. **提交 PR**: 等我来给你"收尸"
-
-### 贡献者精神
-
-> *"我在这里埋过代码，你呢？"*
-
----
-
-## 🎉 彩蛋代码（找到就是赚到）
-
-| 代码 | 彩蛋内容 | 稀有度 |
-|------|---------|--------|
-| `REFACTOR` | 🔄 诈尸了！这个功能被重构后在新版本复活了 | ⭐⭐ |
-| `LEGACY` | 👴 老兵不死，只是慢慢凋零 | ⭐⭐⭐ |
-| `TODO` | 📝 墓志铭写着"TODO: 以后做"，然后就没有以后了 | ⭐ |
-| `DOCS` | 📚 文档比代码活得久系列 | ⭐⭐ |
-| `DELETE` | 🗑️ 等等！我还没死！ | ⭐⭐⭐⭐ |
-| `GHOST` | 👻 墓碑：用户说"我看不到bug"，然后产品说"加急" | ⭐⭐⭐⭐⭐ |
+1. ⭐ Star 一个（给代码尸体们鼓掌）
+2. 🐛 报告 Bug（墓地也有管理员）
+3. 🎁 贡献彩蛋（让诈尸更好玩）
+4. 📢 分享给你的 Coding 伙伴
 
 ---
 
 ## 📦 项目结构
 
 ```
-programmer-cemetery/
-├── .gitignore              # 别把骨灰盒 .gitignore
-├── LICENSE                 # 墓地地契
-├── README.md               # 墓碑使用说明书
-├── package.json           # 法器清单
-└── programmer-cemetery.ts  # 骨灰盒（主程序）
+code-corpses/
+├── README.md          # 墓地使用说明书
+├── src/
+│   ├── scanner.ts    # AI 扫描器
+│   ├── graveyard.ts   # 墓地核心
+│   ├── zombie.ts      # 诈尸检测
+│   └── vibe.ts        # 快乐引擎
+├── .secrets.example   # 配置模板
+└── package.json
 ```
 
 ---
 
-## 🐛 Bug 报告
-
-如果发现：
-- ❌ 墓碑死而复生
-- ❌ 诈尸失败
-- ❌ 彩蛋不生效
-
-请提交 [Issue](https://github.com/stbz/programmer-cemetery/issues)
-
-> ⚠️ **注意**: 本项目不保证诈尸成功率，诈尸失败属于正常现象。
-
----
-
-## 📜 LICENSE
-
-MIT License - 详见 [LICENSE](LICENSE) 文件。
-
-> "代码千古事，得失寸心知。"
-
----
-
-## 💀 Rest in Peace
+## 🧟诈尸宣言
 
 ```
-   _   _   _   _   _   _   _   _   _   _   _   _
-  / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
- | 死 | 的 | 是 | 代 | 码 | ， | 永 | 存 | 的 | 是 |
-  \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/
+   死  掉  的  代  码  不  是  尸  体
+   是  等  着  被  A  I  翻  牌  子  的  潜  力  股
 ```
 
 ---
 
-**程序员的墓碑不是结局，而是下一段代码的开始。** 🪦
-
----
+**快乐 Vibe Coding，代码尸体们集合！** 🎉🪦
 
 <p align="center">
-  <img src="https://img.shields.io/badge/诈尸-v2.0.0-purple?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/摸鱼-完成-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/立碑-成功-green?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/墓地-代码尸体集中营-purple?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/状态-诈尸中-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/哲学-快乐最重要-green?style=for-the-badge" />
 </p>
