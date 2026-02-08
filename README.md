@@ -39,7 +39,7 @@
 | 功能 | 做什么 | 快乐指数 |
 |------|--------|---------|
 | 🤖 **AI 自动扫描** | 90天没动的代码 → 自动标记 | 🧠 |
-| 📥 **一键丢弃** | `gh code trash <file>` → 搞定 | 😌 |
+| 📥 **移送太平间** | 死代码送去墓地，原项目干干净净 | 🏛️ |
 | 🏷️ **智能索引** | 给代码打标签 → 方便 AI 搜索 | 🔍 |
 | 🔄 **诈尸检测** | 旧代码被新项目复用 → 通知你 | 🧟 |
 | 📊 **摸鱼统计** | 丢了多少代码、诈尸多少次 | 📈 |
@@ -115,6 +115,56 @@ docker run --rm ghcr.io/zhifeng-niu/code-corpses:latest --visit
 ```
 
 **完整集成文档：** [integrations/README.md](integrations/README.md)
+
+---
+
+## 🏛️ 代码太平间 - 移送功能
+
+**死掉的代码送去该去的地方，原项目干干净净**
+
+### 核心命令
+
+```bash
+# 📦 移送代码去墓地
+mortuary embalm my-repo "src/old,lib/deprecated" "不再维护"
+
+# 🏛️ 从墓地复活代码
+mortuary resurrect corpse-id
+
+# 🔍 搜索墓地
+mortuary search "auth utils"
+
+# 📊 墓地统计
+mortuary stats
+```
+
+### 移送流程
+
+```
+原项目                          墓地仓库
+┌──────────────┐               ┌──────────────┐
+│  dead_code.js │ ────────────► │  dead_code.js│
+│  old_util.ts  │    移送       │  old_util.ts │
+└──────────────┘               └──────────────┘
+       │                            │
+       ▼                            ▼
+   删除干净                   生成墓碑存档
+```
+
+### Agent 自动化
+
+```yaml
+# .coderagerc
+mortuary:
+  enabled: true
+  auto_embalm: true      # 自动移送
+  confirm_first: true    # 先确认再移送
+  cemetery_repo: "owner/code-cemetery"
+```
+
+### 一句话
+
+> **死代码送去太平间，原项目干干净净** 🏛️
 
 ---
 
