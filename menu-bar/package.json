@@ -1,0 +1,13 @@
+{
+  "name": "code-corpses-tauri",
+  "version": "1.0.0",
+  "description": "🪦 Code Corpses Menu Bar - 监控代码墓地",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "tauri": "cargo tauri"
+  },
+  "keywords": ["tauri", "menubar", "github", "monitor"],
+  "author": "Zhifeng-Niu",
+  "license": "MIT"
+}

@@ -24,7 +24,7 @@ interface Config {
   autoArchive: boolean
 }
 
-class CodeCorpseScanner {
+export class CodeCorpseScanner {
   private octokit: Octokit
   private config: Config
 

@@ -15,7 +15,7 @@ interface ZombieCase {
  复活方式: string
 }
 
-class ZombieDetector {
+export class ZombieDetector {
   private octokit: Octokit
   private owner: string
 
@@ -153,14 +153,49 @@ class ZombieDetector {
 
 // CLI
 const args = process.argv.slice(2)
+const command = args[0]
 
-console.log(`
+async function main() {
+  const token = process.env.GITHUB_TOKEN || ''
+  const owner = process.env.GITHUB_OWNER || 'Zhifeng-Niu'
+  const detector = new ZombieDetector(token, owner)
+
+  switch (command) {
+    case '--detect':
+      const newRepo = args[1]
+      if (!newRepo) {
+        console.log('用法: npx code-corpses detect <repo-name>')
+        return
+      }
+      
+      // 读取墓碑报告
+      let report = ''
+      try {
+        report = fs.readFileSync('./cemetery-report.md', 'utf-8')
+      } catch {
+        // 没有报告就生成一个空的
+        report = '# 墓地\n'
+      }
+      
+      console.log(`🧟 检测 ${newRepo} 是否有诈尸...`)
+      const zombies = await detector.detectZombies(newRepo, report)
+      const zombieReport = detector.generateZombieReport(zombies)
+      console.log(zombieReport)
+      break
+
+    case '--help':
+    default:
+      console.log(`
 🧟 Code Corpses Zombie Detector
 
 用法:
-  检测新仓库是否有诈尸:
-  npx code-corpses detect <new-repo-name>
+  --detect <repo-name>  检测新仓库是否有诈尸
+  --help                显示帮助
 
 示例:
-  npx code-corpses detect my-new-project
-`)
+  npx code-corpses --detect my-new-project
+      `)
+  }
+}
+
+main().catch(console.error)

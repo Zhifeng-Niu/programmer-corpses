@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🪦 Code Corpses</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+      --bg-card: rgba(255,255,255,0.08);
+      --bg-card-hover: rgba(255,255,255,0.12);
+      --text-primary: #ffffff;
+      --text-secondary: #8892b0;
+      --text-muted: #6c757d;
+      --accent-purple: #6c5ce7;
+      --accent-blue: #0984e3;
+      --accent-red: #d63031;
+      --accent-green: #00b894;
+      --accent-orange: #e17055;
+      --accent-yellow: #fdcb6e;
+      --border-radius: 12px;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 20px;
+      width: 360px;
+      overflow-x: hidden;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .header p {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+    
+    .version-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--accent-purple);
+      color: white;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    
+    /* 统计卡片 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .stat-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+    
+    .stat-card .icon { 
+      font-size: 32px; 
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .stat-card .value { 
+      font-size: 28px; 
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-card .label { 
+      font-size: 11px; 
+      color: var(--text-secondary);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .stat-card.zombie .value {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+    
+    .stat-card.scan .value {
+      background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+    
+    /* 操作按钮 */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .btn {
+      padding: 14px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+    }
+    
+    .btn.secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .btn.success {
+      background: linear-gradient(135deg, var(--accent-green) 0%, #55efc4 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0, 184, 148, 0.4);
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .btn-icon {
+      font-size: 18px;
+    }
+    
+    /* 加载动画 */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      border-radius: inherit;
+    }
+    
+    .loading-overlay.active {
+      display: flex;
+    }
+    
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--accent-purple);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      position: absolute;
+      bottom: 20%;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+    
+    /* 扫描进度条 */
+    .scan-progress {
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    
+    .scan-progress.active {
+      display: block;
+    }
+    
+    .scan-progress .label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: progressPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes progressPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    /* 分区标题 */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .section-title {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .refresh-btn {
+      background: none;
+      border: none;
+      color: var(--accent-purple);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    
+    .refresh-btn:hover {
+      background: rgba(108, 92, 231, 0.2);
+    }
+    
+    /* 墓碑列表 */
+    .corpses-list {
+      background: var(--bg-card);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    
+    .corpses-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    .corpses-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .corpses-list::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+    }
+    
+    .corpse-item {
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    
+    .corpse-item:last-child { 
+      margin-bottom: 0; 
+    }
+    
+    .corpse-item:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(108, 92, 231, 0.3);
+      transform: translateX(2px);
+    }
+    
+    .corpse-item .name { 
+      font-size: 13px; 
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .corpse-item .meta { 
+      font-size: 10px; 
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .corpse-item .meta span {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    
+    .corpse-item .tags {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    
+    .tag {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(108, 92, 231, 0.2);
+      color: #a29bfe;
+    }
+    
+    .tag.zombie {
+      background: rgba(214, 48, 49, 0.2);
+      color: #ff7675;
+    }
+    
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--text-muted);
+    }
+    
+    .empty-state .icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+      opacity: 0.5;
+    }
+    
+    .empty-state p {
+      font-size: 12px;
+    }
+    
+    /* 底部 */
+    .footer {
+      text-align: center;
+      margin-top: 16px;
+      color: var(--text-muted);
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    
+    .footer a {
+      color: var(--accent-purple);
+      text-decoration: none;
+    }
+    
+    /* Toast 通知 */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0,0,0,0.9);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1001;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    
+    .toast.success {
+      border-color: var(--accent-green);
+    }
+    
+    .toast.error {
+      border-color: var(--accent-red);
+    }
+    
+    /* 脉冲动画 */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    /* 响应式 */
+    @media (max-width: 400px) {
+      body {
+        width: 100%;
+        padding: 15px;
+      }
+      
+      .header h1 {
+        font-size: 20px;
+      }
+      
+      .stats-grid {
+        gap: 8px;
+      }
+      
+      .stat-card {
+        padding: 12px;
+      }
+      
+      .stat-card .icon {
+        font-size: 24px;
+      }
+      
+      .stat-card .value {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🪦 Code Corpses</h1>
+    <p>代码墓地监控 · 守护项目安宁</p>
+    <span class="version-badge" id="version">v1.0</span>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="icon">📊</span>
+      <div class="value" id="total-corpses">--</div>
+      <div class="label">扫描项目</div>
+    </div>
+    <div class="stat-card zombie">
+      <span class="icon">🧟</span>
+      <div class="value" id="zombies-today">--</div>
+      <div class="label">诈尸项目</div>
+    </div>
+    <div class="stat-card scan">
+      <span class="icon">🔄</span>
+      <div class="value" id="last-scan">--</div>
+      <div class="label">最近扫描</div>
+    </div>
+    <div class="stat-card">
+      <span class="icon">⭐</span>
+      <div class="value" id="total-stars">--</div>
+      <div class="label">总星数</div>
+    </div>
+  </div>
+  
+  <div class="actions">
+    <button class="btn primary" id="scan-btn" onclick="scanCemetery()">
+      <span class="btn-icon">🔍</span>
+      扫描墓地
+    </button>
+    <button class="btn secondary" onclick="openSettings()">
+      <span class="btn-icon">⚙️</span>
+      设置
+    </button>
+    <button class="btn success" onclick="sendReport()">
+      <span class="btn-icon">📤</span>
+      发送报告
+    </button>
+  </div>
+  
+  <div class="scan-progress" id="scan-progress">
+    <div class="label">
+      <span>🔄 正在扫描 GitHub...</span>
+      <span id="scan-percent">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+  
+  <div class="section-header">
+    <div class="section-title">📜 最新墓碑</div>
+    <button class="refresh-btn" onclick="loadCorpses()">刷新 ⟳</button>
+  </div>
+  
+  <div class="corpses-list" id="corpses-list">
+    <div class="empty-state">
+      <div class="icon">🪦</div>
+      <p>暂无墓碑数据<br>点击上方按钮开始扫描</p>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <span>🪦 代码千古事，得失寸心知</span>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">正在处理...</div>
+  </div>
+
+  <script>
+    const invoke = window.__TAURI__.core.invoke;
+    let isScanning = false;
+    
+    // 显示 Toast
+    function showToast(message, type = 'default') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast show ' + type;
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    // 显示/隐藏加载
+    function setLoading(show, text = '正在处理...') {
+      const loading = document.getElementById('loading');
+      loading.querySelector('.loading-text').textContent = text;
+      if (show) loading.classList.add('active');
+      else loading.classList.remove('active');
+    }
+    
+    // 格式化时间
+    function formatTimeAgo(dateStr) {
+      if (!dateStr || dateStr === '从未扫描') return '未知';
+      
+      try {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+        
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' 小时前';
+        return Math.floor(diff / 86400) + ' 天前';
+      } catch (e) {
+        return dateStr;
+      }
+    }
+    
+    // 加载统计
+    async function loadStats() {
+      try {
+        const stats = await invoke('get_stats');
+        document.getElementById('total-corpses').textContent = stats.total || '0';
+        document.getElementById('zombies-today').textContent = stats.zombies || '0';
+        document.getElementById('last-scan').textContent = formatTimeAgo(stats.last_scan);
+      } catch (e) {
+        console.log('获取统计失败:', e);
+      }
+    }
+    
+    // 加载版本
+    async function loadVersion() {
+      try {
+        const version = await invoke('get_version');
+        document.getElementById('version').textContent = 'v' + version;
+      } catch (e) {
+        // 忽略
+      }
+    }
+    
+    // 加载墓碑列表
+    async function loadCorpses() {
+      try {
+        const corpses = await invoke('get_recent_corpses', { limit: 10 });
+        const list = document.getElementById('corpses-list');
+        
+        if (!corpses || corpses.length === 0) {
+          list.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">🪦</div>
+              <p>暂无墓碑数据<br>点击上方按钮开始扫描</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // 计算总星数
+        let totalStars = corpses.reduce((sum, c) => sum + (c.stars || 0), 0);
+        document.getElementById('total-stars').textContent = totalStars > 0 ? formatNumber(totalStars) : '--';
+        
+        list.innerHTML = corpses.map(c => `
+          <div class="corpse-item" onclick="openRepo('${c.repo_url}')">
+            <div class="name">
+              ${c.language ? `<span style="color: ${getLangColor(c.language)}">●</span>` : ''}
+              ${c.name}
+            </div>
+            <div class="meta">
+              <span>💀 ${c.cause}</span>
+              <span>⭐ ${c.stars}</span>
+              <span>📅 ${c.date}</span>
+            </div>
+            <div class="tags">
+              <span class="tag zombie">🧟 诈尸</span>
+              ${c.language ? `<span class="tag">${c.language}</span>` : ''}
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.log('获取墓碑失败:', e);
+      }
+    }
+    
+    // 格式化数字
+    function formatNumber(num) {
+      if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'k';
+      }
+      return num.toString();
+    }
+    
+    // 语言颜色
+    function getLangColor(lang) {
+      const colors = {
+        'Rust': '#dea584',
+        'JavaScript': '#f1e05a',
+        'TypeScript': '#2b7489',
+        'Python': '#3572A5',
+        'Go': '#00ADD8',
+        'Java': '#b07219',
+        'C++': '#f34b7d',
+        'C': '#555555',
+        'Vue': '#41b883',
+        'HTML': '#e34c26',
+        'CSS': '#563d7c',
+      };
+      return colors[lang] || '#888888';
+    }
+    
+    // 打开仓库链接
+    async function openRepo(url) {
+      if (url && url !== 'https://github.com') {
+        try {
+          await invoke('open_url', { url });
+        } catch (e) {
+          await invoke('shell_open', { path: url });
+        }
+      }
+    }
+    
+    // 扫描墓地
+    async function scanCemetery() {
+      if (isScanning) return;
+      
+      isScanning = true;
+      const btn = document.getElementById('scan-btn');
+      const progress = document.getElementById('scan-progress');
+      const progressFill = document.getElementById('progress-fill');
+      const progressPercent = document.getElementById('scan-percent');
+      
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;"></span> 扫描中...';
+      progress.classList.add('active');
+      
+      try {
+        const result = await invoke('trigger_scan');
+        
+        // 模拟进度
+        for (let i = 0; i <= 100; i += 10) {
+          progressFill.style.width = i + '%';
+          progressPercent.textContent = i + '%';
+          await new Promise(r => setTimeout(r, 100));
+        }
+        
+        if (result.success) {
+          showToast(`✅ ${result.message}`, 'success');
+          await loadStats();
+          await loadCorpses();
+        } else {
+          showToast('❌ 扫描失败: ' + result.message, 'error');
+        }
+      } catch (e) {
+        console.log('扫描失败:', e);
+        showToast('❌ 扫描失败: ' + (e.message || e), 'error');
+      } finally {
+        isScanning = false;
+        btn.disabled = false;
+        btn.innerHTML = '<span class="btn-icon">🔍</span> 扫描墓地';
+        setTimeout(() => {
+          progress.classList.remove('active');
+          progressFill.style.width = '0%';
+        }, 500);
+      }
+    }
+    
+    // 打开设置
+    async function openSettings() {
+      setLoading(true, '加载配置中...');
+      try {
+        const config = await invoke('load_config');
+        
+        const token = prompt(
+          'GitHub Token 设置\n\n' +
+          '输入你的 GitHub Personal Access Token (可选):\n' +
+          '- 需要 repo 和 read:org 权限\n' +
+          '- 提高 API 访问速率限制\n\n' +
+          '当前 Token: ' + (config.github_token ? '已设置 ✓' : '未设置')
+        );
+        
+        if (token !== null) {
+          await invoke('update_github_token', { token: token.trim() });
+          showToast('✅ Token 已更新', 'success');
+        }
+      } catch (e) {
+        console.log('加载配置失败:', e);
+        showToast('❌ 加载配置失败', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // 发送报告
+    async function sendReport() {
+      setLoading(true, '正在生成报告...');
+      try {
+        const result = await invoke('send_report');
+        showToast('📤 ' + result, 'success');
+      } catch (e) {
+        console.log('发送失败:', e);
+        showToast('❌ 发送失败', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // 初始化
+    async function init() {
+      await loadVersion();
+      await loadStats();
+      await loadCorpses();
+    }
+    
+    init();
+    
+    // 定时刷新 (每5分钟)
+    setInterval(() => {
+      if (!isScanning) {
+        loadStats();
+        loadCorpses();
+      }
+    }, 300000);
+  </script>
+</body>
+</html>

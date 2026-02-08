@@ -1,0 +1,6 @@
+{
+  "github_token": null,
+  "target_org": "microsoft",
+  "scan_interval": 3600,
+  "auto_start": false
+}
