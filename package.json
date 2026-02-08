@@ -1,38 +1,54 @@
 {
-  "name": "programmer-cemetery",
-  "version": "1.0.0",
-  "description": "🪦 纪念那些死掉的代码 - 程序员墓地",
-  "main": "programmer-cemetery.ts",
+  "name": "code-corpses",
+  "version": "2.5.0",
+  "description": "🪦 代码尸体集中营 - AI时代的代码轮回中转站，快乐Vibe Coding！",
+  "main": "dist/index.js",
+  "bin": {
+    "code-corpses": "./dist/index.js",
+    "cemetery": "./dist/index.js"
+  },
   "scripts": {
-    "start": "npx ts-node programmer-cemetery.ts",
-    "visit": "npx ts-node programmer-cemetery.ts --visit",
-    "stats": "npx ts-node programmer-cemetery.ts --stats",
-    "anniversary": "npx ts-node programmer-cemetery.ts --anniversary",
-    "help": "npx ts-node programmer-cemetery.ts --help",
-    "build": "tsc programmer-cemetery.ts --outDir dist",
-    "deploy": "npm run build && cp -r dist/* ."
+    "start": "npx ts-node src/index.ts",
+    "visit": "npx ts-node src/index.ts --visit",
+    "stats": "npx ts-node src/index.ts --stats",
+    "anniversary": "npx ts-node src/index.ts --anniversary",
+    "scan": "npx ts-node src/scanner.ts --scan",
+    "detect": "npx ts-node src/zombie.ts --detect",
+    "help": "npx ts-node src/index.ts --help",
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn src/index.ts"
   },
   "keywords": [
+    "code-corpses",
     "cemetery",
-    "programmer",
+    "zombie",
+    "dead-code",
     "fun",
     "cli",
-    "commits",
-    "git",
-    "墓碑"
+    "vibe-coding",
+    "墓碑",
+    "诈尸",
+    "ai"
   ],
-  "author": "Your Name",
+  "author": "Zhifeng-Niu",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/programmer-cemetery.git"
+    "url": "https://github.com/Zhifeng-Niu/programmer-corpses.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/programmer-cemetery/issues"
+    "url": "https://github.com/Zhifeng-Niu/programmer-corpses/issues"
   },
-  "homepage": "https://github.com/yourusername/programmer-cemetery#readme",
+  "homepage": "https://github.com/Zhifeng-Niu/programmer-corpses#readme",
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "js-yaml": "^4.1.0"
+  },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.10.0",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
   }
 }
