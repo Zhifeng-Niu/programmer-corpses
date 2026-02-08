@@ -1,0 +1,39 @@
+# 📦 Code Corpses GitHub Action
+# 自动扫描代码墓地 - 集成到任何 CI/CD
+
+name: 🪦 Code Corpses Scan
+
+on:
+  schedule:
+    # 每周一早上9点自动扫描
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      threshold:
+        description: '死代码阈值（天）'
+        required: false
+        default: '90'
+
+jobs:
+  scan-cemetery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 🕵️ 运行 Code Corpses
+        run: |
+          npm install -g code-corpses
+          code-corpses scan --threshold ${{ github.event.inputs.threshold || '90' }}
+      
+      - name: 📊 上传墓碑报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: cemetery-report
+          path: cemetery-report.md
+      
+      - name: 🔔 通知（可选）
+        if: github.event_name == 'schedule'
+        run: |
+          # 发送到 Telegram / Discord / Email
+          echo "🪦 墓地扫描完成！"

@@ -1,0 +1,92 @@
+# 🤖 Code Corpses Claude Code 配置
+# 让你的 Coding Agent 自动管理代码墓地
+#
+# 放到项目根目录或 ~/.claude/code-corpses.json
+
+{
+  "name": "code-corpses",
+  "description": "🪦 代码尸体集中营 - AI时代的代码轮回中转站",
+  "version": "2.5.0",
+  "author": "Zhifeng-Niu",
+  "license": "MIT",
+  "repository": "https://github.com/Zhifeng-Niu/programmer-corpses",
+  
+  "integration": {
+    "type": "agent-tool",
+    "enabled": true,
+    "auto_run": false
+  },
+  
+  "tools": [
+    {
+      "name": "visit_cemetery",
+      "description": "🎲 随机访问一个代码墓碑，获取死代码的故事",
+      "command": "code-corpses --visit"
+    },
+    {
+      "name": "check_dead_code",
+      "description": "🔍 检查某段代码是否已经'死掉'（长时间无修改）",
+      "command": "code-corpses scan --file {{filePath}}",
+      "parameters": {
+        "filePath": {
+          "type": "string",
+          "description": "要检查的文件路径"
+        }
+      }
+    },
+    {
+      "name": "generate_tombstone",
+      "description": "🪦 为一段代码生成墓碑",
+      "command": "code-corpses --tombstone --name '{{name}}' --cause '{{causeOfDeath}}'",
+      "parameters": {
+        "name": { "type": "string", "description": "代码名称" },
+        "causeOfDeath": { "type": "string", "description": "死因" }
+      }
+    },
+    {
+      "name": "cemetery_stats",
+      "description": "📊 获取墓地统计信息",
+      "command": "code-corpses --stats"
+    },
+    {
+      "name": "scan_repository",
+      "description": "🕵️ 扫描整个仓库找死代码",
+      "command": "code-corpses scan --repo {{repoPath}}",
+      "parameters": {
+        "repoPath": {
+          "type": "string",
+          "description": "仓库路径（默认当前目录）"
+        }
+      }
+    },
+    {
+      "name": "detect_zombie",
+      "description": "🧟 检测诈尸案例",
+      "command": "code-corpses --detect --keywords '{{keywords}}'",
+      "parameters": {
+        "keywords": {
+          "type": "string", 
+          "description": "搜索关键词"
+        }
+      }
+    }
+  ],
+  
+  "agent_prompts": {
+    "on_dead_code_detected": "我发现了一段可能'死掉'的代码：{{filePath}}\n\n💀 死因: {{reason}}\n⏰ 最后修改: {{lastModified}}\n\n🪦 建议：\n1. 如果确定不再需要，可以生成墓碑并归档\n2. 如果可能被复用，标记为'待复活'\n3. 如果需要保留，添加活跃标记",
+    
+    "on_zombie_detected": "🧟 发现诈尸！\n\n墓地中的代码 {{corpsePath}} 在 {{newRepo}} 中被发现了！\n相似度: {{similarity}}%\n\n💡 这个代码'复活'了！要更新墓碑状态吗？"
+  },
+  
+  "settings": {
+    "scan_threshold_days": 90,
+    "auto_archive": false,
+    "notify_on_zombie": true,
+    "generate_epitaph": true
+  }
+}
+
+# 使用方法：
+# 1. 复制此文件到项目根目录
+# 2. Agent 会自动读取配置
+# 3. 对 Agent 说："检查一下死代码" 或 "生成一个墓碑"
