@@ -40,6 +40,7 @@
     "url": "https://github.com/Zhifeng-Niu/programmer-corpses/issues"
   },
   "homepage": "https://github.com/Zhifeng-Niu/programmer-corpses#readme",
+  "changelog": "https://github.com/Zhifeng-Niu/programmer-corpses/blob/main/CHANGELOG.md",
   "dependencies": {
     "@octokit/rest": "^20.0.2",
     "js-yaml": "^4.1.0"
