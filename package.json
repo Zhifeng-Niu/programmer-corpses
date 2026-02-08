@@ -1,0 +1,38 @@
+{
+  "name": "programmer-cemetery",
+  "version": "1.0.0",
+  "description": "🪦 纪念那些死掉的代码 - 程序员墓地",
+  "main": "programmer-cemetery.ts",
+  "scripts": {
+    "start": "npx ts-node programmer-cemetery.ts",
+    "visit": "npx ts-node programmer-cemetery.ts --visit",
+    "stats": "npx ts-node programmer-cemetery.ts --stats",
+    "anniversary": "npx ts-node programmer-cemetery.ts --anniversary",
+    "help": "npx ts-node programmer-cemetery.ts --help",
+    "build": "tsc programmer-cemetery.ts --outDir dist",
+    "deploy": "npm run build && cp -r dist/* ."
+  },
+  "keywords": [
+    "cemetery",
+    "programmer",
+    "fun",
+    "cli",
+    "commits",
+    "git",
+    "墓碑"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/programmer-cemetery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/programmer-cemetery/issues"
+  },
+  "homepage": "https://github.com/yourusername/programmer-cemetery#readme",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
