@@ -31,7 +31,46 @@
 
 ---
 
-## 🚀 快速开始（3秒上手）
+## 🚀 部署到 GitHub
+
+### 前置条件
+
+确保已安装 [GitHub CLI](https://cli.github.com/):
+
+```bash
+brew install gh
+```
+
+### 快速发布
+
+```bash
+# 1. 登录 GitHub（会打开浏览器）
+gh auth login --web
+
+# 2. 创建并推送仓库
+gh repo create programmer-cemetery \
+    --public \
+    --description "🪦 纪念那些死掉的代码 - 程序员墓地 CLI 工具" \
+    --source=. \
+    --push
+
+# 或者运行提供的脚本
+chmod +x setup-github.sh
+./setup-github.sh
+```
+
+### 手动发布（如果 prefer）
+
+```bash
+# 1. 在 GitHub 创建仓库: https://github.com/new
+#    仓库名: programmer-cemetery
+#    描述: 🪦 纪念那些死掉的代码
+
+# 2. 推送本地代码
+git remote add origin https://github.com/stbz/programmer-cemetery.git
+git branch -M main
+git push -u origin main
+```（3秒上手）
 
 ### 方法1：直接运行（推荐）
 
