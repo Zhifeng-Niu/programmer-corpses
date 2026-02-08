@@ -122,10 +122,28 @@ docker run --rm ghcr.io/zhifeng-niu/code-corpses:latest --visit
 
 **死掉的代码送去该去的地方，原项目干干净净**
 
+### ⚠️ 重要提示
+
+| 功能 | 默认 | 说明 |
+|------|------|------|
+| 📜 生成墓碑 | ✅ 必选 | 核心功能，一定会执行 |
+| 🗑️ 删除代码 | ❌ 可选 | 需要手动开启删除权限 |
+
+### 安全设计
+
+```yaml
+# 默认配置（安全）
+cemetery:
+  allow_delete: false  # ⚠️ 默认不删除！
+  
+tombstone:
+  enabled: true        # ✅ 墓碑一定会生成
+```
+
 ### 核心命令
 
 ```bash
-# 📦 移送代码去墓地
+# 📦 移送代码（只生成墓碑，不删除）
 mortuary embalm my-repo "src/old,lib/deprecated" "不再维护"
 
 # 🏛️ 从墓地复活代码
@@ -148,8 +166,23 @@ mortuary stats
 └──────────────┘               └──────────────┘
        │                            │
        ▼                            ▼
-   删除干净                   生成墓碑存档
+   保持原样                   🪦 生成墓碑存档
 ```
+
+### 开启删除权限（⚠️ 需要手动）
+
+```yaml
+# mortuary.config.yaml
+cemetery:
+  allow_delete: true    # ⚠️ 危险！需要手动开启
+  confirm_delete: true # 删除前确认
+```
+
+**⚠️ 警告：**
+- 删除代码是敏感操作
+- 默认只生成墓碑，不删除任何代码
+- 开启删除权限前请阅读配置文件的详细说明
+- 建议先在测试环境验证
 
 ### Agent 自动化
 
@@ -157,14 +190,14 @@ mortuary stats
 # .coderagerc
 mortuary:
   enabled: true
-  auto_embalm: true      # 自动移送
-  confirm_first: true    # 先确认再移送
+  allow_delete: false    # ⚠️ 默认关闭删除
+  tombstone_only: true   # ✅ 只生成墓碑
   cemetery_repo: "owner/code-cemetery"
 ```
 
 ### 一句话
 
-> **死代码送去太平间，原项目干干净净** 🏛️
+> **墓碑一定生成，删除你做主** 🏛️
 
 ---
 
