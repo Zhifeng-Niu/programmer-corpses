@@ -87,6 +87,37 @@ Agent 会自动：
 
 ---
 
+## 🌐 全环境集成
+
+墓地无处不在 🌍
+
+| 平台 | 安装/使用 | 场景 |
+|------|----------|------|
+| **npm** | `npm i -g code-corpses` | CLI 日常使用 |
+| **Docker** | `docker run ghcr.io/...` | 任何服务器 |
+| **GitHub Actions** | `integrations/github-action.yml` | CI/CD 自动化 |
+| **Claude MCP** | `integrations/mcp-server.ts` | AI Agent 集成 |
+| **Claude Code** | `integrations/claude-code.json` | Coding Agent |
+| **Python** | `pip install code-corpses` | Python 生态 |
+| **Web API** | `integrations/api.ts` | 自定义部署 |
+
+### 快速集成
+
+```bash
+# GitHub Actions（每周自动扫描）
+cp integrations/github-action.yml .github/workflows/cemetery.yml
+
+# Claude Code（让 Agent 管理墓地）
+cp integrations/claude-code.json ./
+
+# Docker（一键运行）
+docker run --rm ghcr.io/zhifeng-niu/code-corpses:latest --visit
+```
+
+**完整集成文档：** [integrations/README.md](integrations/README.md)
+
+---
+
 ## 💬 一句话
 
 > AI 时代，代码可以死很多次，但每次都能被捞回来 🔄
