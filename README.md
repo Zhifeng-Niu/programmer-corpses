@@ -1,6 +1,6 @@
-# 🪦 Code Corpses - 代码墓地 (Universal AI Capability Module)
+# 🪦 Code Corpses - 代码墓地
 
-> *"死代码不是终点，是等 AI 翻牌子的轮回中转站"* 🧟‍♂️
+> *"死代码不是终点，是等 AI 翻牌子的轮回中转站"* 🧟♂️
 
 [![Vibe: Happy Coding](https://img.shields.io/badge/vibe-Happy%20Coding-purple?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
@@ -8,134 +8,169 @@
 
 ---
 
-## 🎯 核心特性：通用 AI 能力模块
+## 💀 这是什么鬼？
 
-**让任何 AI Agent 都能使用代码墓地：Claude、GPT、OpenClaw、本地模型...**
+**AI 时代代码太多了，写完就丢，丢哪儿？**
 
-```typescript
-interface CemeteryCapability {
-  analyzeCode(path: string): Promise<AnalysisResult>
-  createTombstone(path: string, cause: string): Promise<Tombstone>
-  detectZombie(newCode: string): Promise<ZombieResult>
-  listAssets(filter?: AssetFilter): Promise<Asset[]>
-  search(query: string): Promise<SearchResult[]>
-  getSummary(): Promise<CemeterySummary>
-}
-```
+丢进 **代码墓地** 🪦
+
+- 📦 你不管的代码 → AI 自动扫描 → 丢进墓地
+- 🔍 新项目需要功能 → AI 去墓地翻一翻 → 诈尸复用
+- 🧟 死掉的代码不是真死，只是等 AI 来捞
+
+> **核心哲学：** 墓地不是终点，是代码的"轮回中转站"
 
 ---
 
-## 🚀 四种使用方式
+## 🎯 名字的生前遗书
+
+| 版本 | 名字 | 死因 |
+|------|------|------|
+| v1.0 | 🪦 **programmer-cemetery** | "程序员"限定太窄，谁还没丢过代码 |
+| v2.0 | 🪦 **programmer-corpses** | "墓地"太忌讳，但"尸体"够直白 |
+| v3.0 | 🪦 **code-corpses** | 名字不重要，开心最重要 😄 |
+| v4.0 | 🪦 **Universal AI 模块** | 任何 AI 都能用，开心开心开心！ |
+
+> RIP 所有曾经的名字 —— 它们在 git log 里永垂不朽 ✨
+
+---
+
+## ✨ 我们做什么
+
+| 功能 | 做什么 | 快乐指数 |
+|------|--------|---------|
+| 🤖 **AI 自动扫描** | 90天没动的代码 → 自动标记 | 🧠 |
+| 📦 **统一资产索引** | 代码/文本/模板/想法 → 全都管 | 📦 |
+| 🪦 **墓碑生成器** | 死代码立碑 → 墓志铭+标签 | 🪦 |
+| 🧟 **诈尸检测器** | 旧代码被新项目复用 → 通知你 | 🧟 |
+| 🔍 **智能搜索** | 墓地里翻一翻 → 找到可用代码 | 🔎 |
+| 📊 **仪表板** | 一眼看穿你的代码墓地 | 📈 |
+| 🌐 **通用接口** | 任何 AI 都能调用 | 🤖 |
+
+---
+
+## 🚀 四种玩法
 
 ### 1️⃣ REST API (最通用)
 
+随便一个能发 HTTP 请求的都能用：
+
 ```bash
-# 启动 API 服务器
+# 启动墓地服务器
 npm run serve:api
 
-# API 端点
-GET  /api/health          # 健康检查
-GET  /api/summary         # 获取统计摘要
-GET  /api/assets          # 列出资产
-GET  /api/tombstones      # 列出墓碑
-GET  /api/search?q=auth   # 搜索
-POST /api/analyze         # 分析代码
-POST /api/tombstone       # 创建墓碑
-POST /api/detect-zombie   # 检测诈尸
-POST /api/index           # 索引目录
-```
-
-**curl 示例：**
-```bash
-# 获取统计摘要
+# 看看你杀了多少代码
 curl http://localhost:3000/api/summary
 
-# 搜索代码
+# 墓地淘宝
 curl "http://localhost:3000/api/search?q=auth"
 
-# 分析代码
-curl -X POST http://localhost:3000/api/analyze \
+# 给代码办葬礼
+curl -X POST http://localhost:3000/api/tombstone \
   -H "Content-Type: application/json" \
-  -d '{"path": "./src/old-module.ts"}'
+  -d '{"path": "./src/old-module.ts", "cause": "没人爱了"}'
 ```
 
-### 2️⃣ MCP Server (Claude Code 专用)
+### 2️⃣ MCP Server (Claude Code 专属 🎉)
+
+Claude Code 用户的快乐：
 
 ```bash
 # 启动 MCP Server
 npm run serve:mcp
 
-# Claude Code 配置
-# 在 claude_code_mcp.json 中添加:
-{
-  "mcpServers": {
-    "cemetery": {
-      "command": "npx",
-      "args": ["ts-node", "src/cli.ts", "serve", "mcp"]
-    }
-  }
-}
+# Claude 就能调用墓地工具了！
+# "帮我看看这段代码死了没"
+# "把那个老模块埋了"
 ```
 
 **可用工具：**
-- `analyze_code` - 分析代码是否已死
-- `create_tombstone` - 为代码创建墓碑
-- `detect_zombie` - 检测诈尸代码
-- `list_assets` - 列出资产
-- `search_cemetery` - 搜索墓地
-- `get_summary` - 获取统计摘要
-- `index_path` - 索引目录
-- `visit_tombstone` - 随机访问墓碑
+- `analyze_code` - 这段代码凉了吗？
+- `create_tombstone` - 办葬礼！
+- `detect_zombie` - 诈尸检测 🧟
+- `search_cemetery` - 墓地淘宝
+- `visit_tombstone` - 随机看墓碑故事
 
-### 3️⃣ OpenAI Functions (GPT-4 专用)
+### 3️⃣ OpenAI Functions (GPT-4 专属)
+
+GPT 也能玩墓地：
 
 ```typescript
-// 在你的 GPT 中配置函数定义
-const functions = [
-  {
-    name: "cemetery_analyze_code",
-    description: "分析代码是否已死...",
-    parameters: {
-      type: "object",
-      properties: {
-        path: { type: "string", description: "代码路径" }
-      }
-    }
-  },
-  // ... 更多函数定义
-]
+// 配置好函数定义后
+"帮我分析 ./src/dead-code.ts 死了没"
+"把那个 auth 模块埋了，原因是太老了"
 ```
 
-### 4️⃣ CLI (人类专用)
+### 4️⃣ CLI (人类专用 👋)
 
 ```bash
-# 索引目录
-cemetery index --path ./src
+# 索引你的代码
+cemetery index --path ./my-project
 
-# 分析代码
+# 分析代码是否已死
 cemetery analyze ./src/old-module.ts
 
 # 创建墓碑
 cemetery tombstone --create ./src/dead.ts --cause "deprecated"
 
-# 搜索
+# 墓地淘宝
 cemetery search auth
 
-# 查看统计
+# 统计你杀了多少代码
 cemetery stats
+
+# 随机看一个墓碑故事
+cemetery visit
+```
+
+---
+
+## 🎮 怎么玩
+
+### 方式 A：让 AI 当墓地管理员
+
+```yaml
+# .coderagerc
+cemetery:
+  enabled: true
+  scan_interval: weekly
+  dead_threshold_days: 90
+  auto_archive: true
+  notify: telegram
+```
+
+AI 自动：
+- 每周扫描 → 找到死代码 → 生成墓碑
+- 检测诈尸 → 旧代码被复用 → 通知你
+- 统计报告 → 发送到你的渠道
+
+### 方式 B：手动扫墓（摸鱼用）
+
+```bash
+# 随机看一个墓碑故事
+cemetery visit
+
+# 看看你杀了多少代码
+cemetery stats
+
+# 今天有代码忌日吗
+cemetery anniversary
+
+# 彩蛋时间
+cemetery egg REFACTOR
 ```
 
 ---
 
 ## 📦 快速开始
 
-### 安装
+### 1. 装一下
 
 ```bash
 npm install -g code-corpses
 ```
 
-### 初始化墓地
+### 2. 开始丢人...不对，索引代码
 
 ```bash
 # 索引当前目录
@@ -145,6 +180,14 @@ cemetery index --path .
 npm run serve:api
 ```
 
+### 3. 开始你的表演
+
+```bash
+cemetery dashboard   # 看看你的数字墓地
+cemetery start       # 启动自动扫描
+cemetery stop        # 停止
+```
+
 ---
 
 ## 🏗️ 项目结构
@@ -152,62 +195,22 @@ npm run serve:api
 ```
 programmer-corpses/
 ├── src/
-│   ├── cli.ts                    # CLI 入口 + 统一命令路由
+│   ├── cli.ts                    # CLI 入口
 │   ├── core/
-│   │   ├── interfaces.ts         # 🌟 CemeteryCapability 接口定义
-│   │   ├── analyzer.ts           # 🤖 代码分析器
-│   │   ├── tombstone.ts          # 🪦 墓碑生成器
-│   │   ├── zombie.ts             # 🧟 诈尸检测器
-│   │   └── indexer.ts            # 📦 资产索引器
+│   │   ├── interfaces.ts         # 🌟 统一接口定义
+│   │   ├── analyzer.ts          # 🤖 代码分析器
+│   │   └── ...                   # 更多核心模块
 │   ├── adapters/
-│   │   ├── mcp-server.ts         # 🤖 MCP Server 适配器
-│   │   ├── openai-functions.ts   # 🎯 OpenAI Functions 适配器
-│   │   └── rest-api.ts           # 🌐 REST API 适配器
-│   ├── asset-index.ts            # 📦 统一资产索引
-│   ├── tombstone-registry.ts     # 🪦 墓碑注册处
-│   └── dashboard.ts              # 📊 仪表板生成器
-├── menu-bar/                     # 🍎 Menu Bar 应用
-├── package.json
-└── README.md
+│   │   ├── mcp-server.ts        # 🤖 MCP Server
+│   │   ├── openai-functions.ts  # 🎯 OpenAI Functions
+│   │   └── rest-api.ts          # 🌐 REST API
+│   ├── asset-index.ts           # 📦 统一资产索引
+│   ├── tombstone-registry.ts   # 🪦 墓碑注册处
+│   ├── dashboard.ts             # 📊 仪表板
+│   └── auto-scanner.ts          # 🤖 自动扫描器
+├── menu-bar/                    # 🍎 Menu Bar 应用
+└── README.md                    # 你正在看的快乐文档
 ```
-
----
-
-## 🎮 核心命令
-
-```bash
-# 📦 索引资产
-cemetery index --path ./my-project/src
-cemetery index --github owner/repo
-
-# 🪦 创建墓碑
-cemetery tombstone --create ./src/old-auth.ts --cause "被新认证模块替代"
-
-# 🔍 搜索
-cemetery search auth
-cemetery search "typescript utils"
-
-# 📊 统计
-cemetery stats
-cemetery digest
-
-# 🕵️ 分析
-cemetery analyze ./src/old-module.ts
-```
-
----
-
-## 🎯 使用场景
-
-| 场景 | AI Agent 使用方式 |
-|------|------------------|
-| 分析代码是否已死 | `analyze_code(path)` |
-| 为死代码创建墓碑 | `create_tombstone(path, cause)` |
-| 检测代码是否诈尸 | `detect_zombie(newCode)` |
-| 搜索墓地 | `search_cemetery(query)` |
-| 获取统计摘要 | `get_summary()` |
-| 索引新目录 | `index_path(path)` |
-| 随机访问墓碑 | `visit_tombstone()` |
 
 ---
 
@@ -231,23 +234,48 @@ npm run build
 
 ---
 
-## 🎉 哲学理念
+## 🎯 使用场景
 
-> **Human Off the Loop: AI works autonomously, humans only see results**
-
-- ✅ 快乐编程 (Happy Vibe Coding)
-- ✅ 即插即用 (Plug-and-play for any AI)
-- ✅ 自动化优先 (Mostly automatic)
-- ✅ 代码墓地即服务 (Cemetery as a Service)
+| 场景 | 怎么玩 |
+|------|--------|
+| 分析代码是否已死 | `cemetery analyze ./src/old-module.ts` |
+| 为死代码创建墓碑 | `cemetery tombstone --create ./src/dead.ts --cause "没人爱"` |
+| 检测代码是否诈尸 | `cemetery detect-zombie ./src/new-code.ts` |
+| 搜索墓地 | `cemetery search auth` |
+| 获取统计摘要 | `cemetery dashboard` |
+| 索引新目录 | `cemetery index --path ./my-project` |
+| 随机访问墓碑 | `cemetery visit` |
 
 ---
+
+## 🎉 哲学理念
+
+> **Human Off the Loop: AI 自行运转，人类只看结果**
+
+- ✅ 快乐编程 (Happy Vibe Coding) 😄
+- ✅ 任何 AI 都能用 (Universal AI Module) 🤖
+- ✅ 自动化优先 (Mostly automatic) ⚡
+- ✅ 代码墓地即服务 (Cemetery as a Service) 🪦
+
+---
+
+## 🤝 一起开心
+
+开源快乐，欢迎一起维护！
+
+```bash
+# 提 PR
+# 提 Issue
+# 或者只是来看看代码墓地又多了什么墓碑
+```
 
 **死代码不是尸体，是等着被 AI 翻牌子的潜力股！** 🪦💪
 
 ---
 
 <p align="center">
-  <img src="https://img.shields.io/badge/墓地-Universal%20AI-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/墓地-代码墓地-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/协议-MIT-green?style=for-the-badge" />
   <img src="https://img.shields.io/badge/状态-Happy%20Coding-purple?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/版本-Universal%20AI Module-yellow?style=for-the-badge" />
 </p>
