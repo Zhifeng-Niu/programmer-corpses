@@ -3,432 +3,403 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🪦 Code Corpses</title>
+  <title>🪦 Code Graveyard</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     :root {
-      --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-      --bg-card: rgba(255,255,255,0.08);
-      --bg-card-hover: rgba(255,255,255,0.12);
-      --text-primary: #ffffff;
-      --text-secondary: #8892b0;
-      --text-muted: #6c757d;
-      --accent-purple: #6c5ce7;
-      --accent-blue: #0984e3;
-      --accent-red: #d63031;
-      --accent-green: #00b894;
-      --accent-orange: #e17055;
-      --accent-yellow: #fdcb6e;
-      --border-radius: 12px;
+      --bg-color: #f0f4f8;
+      --border-color: #000;
+      --shadow-color: #000;
+      --shadow-offset: 6px;
+      --bubble-bg: #fff;
+      --bubble-hover-bg: #fffeca;
+      --accent-red: #ff6b81;
+      --accent-green: #2ed573;
+      --accent-yellow: #ffa502;
+      --accent-purple: #a55eea;
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+      background: var(--bg-color);
       min-height: 100vh;
-      padding: 20px;
-      width: 360px;
+      padding: 30px;
+      width: 340px;
       overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255, 107, 129, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(165, 94, 234, 0.1) 0%, transparent 50%);
     }
     
-    .header {
+    /* 气泡基础样式 */
+    .bubble {
+      background: var(--bubble-bg);
+      border: 3px solid var(--border-color);
+      border-radius: 30px;
+      padding: 20px 25px;
+      box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    
+    .bubble:hover {
+      transform: scale(0.97) translate(3px, 3px);
+      box-shadow: 0 0 0 var(--shadow-color);
+      background: var(--bubble-hover-bg);
+    }
+    
+    .bubble:active {
+      transform: scale(0.95) translate(6px, 6px);
+      box-shadow: none;
+    }
+    
+    /* 标题气泡 */
+    .header-bubble {
+      background: var(--accent-red);
+      color: white;
       text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .header-bubble h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      margin: 0;
+      text-shadow: 2px 2px 0 var(--shadow-color);
+      letter-spacing: 1px;
+    }
+    
+    .header-bubble p {
+      font-size: 0.85rem;
+      margin: 5px 0 0 0;
+      opacity: 0.9;
+    }
+    
+    /* 统计网格 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
       margin-bottom: 20px;
+    }
+    
+    .stat-bubble {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .stat-bubble .icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    
+    .stat-bubble .label {
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .stat-bubble .value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #1a1a2e;
+    }
+    
+    /* 诈尸气泡 */
+    .zombie-bubble {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: white;
+      margin-bottom: 20px;
+      overflow: hidden;
       position: relative;
     }
     
-    .header h1 {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 4px;
+    .zombie-text {
+      font-size: 1.3rem;
+      font-weight: 900;
+      text-shadow: 2px 2px 0 var(--shadow-color);
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 8px;
     }
     
-    .header p {
-      color: var(--text-secondary);
-      font-size: 12px;
+    .zombie-emoji {
+      font-size: 2.5rem;
+      animation: zombieBounce 1s ease-in-out infinite;
     }
     
-    .version-badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: var(--accent-purple);
+    @keyframes zombieBounce {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-5px) rotate(5deg); }
+    }
+    
+    .lightning {
+      font-size: 2.2rem;
+      transform: rotate(15deg);
+      filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.3));
+    }
+    
+    /* 扫描标签 */
+    .scan-tag {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    
+    .scan-info {
+      background: var(--accent-green);
       color: white;
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 2px solid var(--border-color);
+      box-shadow: 3px 3px 0 var(--shadow-color);
+      transform: rotate(-1deg);
     }
     
-    /* 统计卡片 */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
+    .scan-info:hover {
+      transform: rotate(1deg) scale(0.98);
     }
     
-    .stat-card {
-      background: var(--bg-card);
-      border-radius: var(--border-radius);
-      padding: 16px;
-      text-align: center;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    
-    .stat-card:hover {
-      background: var(--bg-card-hover);
-      transform: translateY(-2px);
-    }
-    
-    .stat-card .icon { 
-      font-size: 32px; 
-      margin-bottom: 8px;
-      display: block;
-    }
-    
-    .stat-card .value { 
-      font-size: 28px; 
-      font-weight: 800;
-      background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .stat-card .label { 
-      font-size: 11px; 
-      color: var(--text-secondary);
-      margin-top: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .stat-card.zombie .value {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-    }
-    
-    .stat-card.scan .value {
-      background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-    }
-    
-    /* 操作按钮 */
-    .actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .btn {
-      padding: 14px 20px;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    
-    .btn:hover { 
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-    }
-    
-    .btn:active {
-      transform: translateY(0);
-    }
-    
-    .btn.primary {
-      background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
-    }
-    
-    .btn.secondary {
-      background: var(--bg-card);
-      color: var(--text-primary);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .btn.success {
-      background: linear-gradient(135deg, var(--accent-green) 0%, #55efc4 100%);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(0, 184, 148, 0.4);
-    }
-    
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-    
-    .btn-icon {
-      font-size: 18px;
-    }
-    
-    /* 加载动画 */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      border-radius: inherit;
-    }
-    
-    .loading-overlay.active {
-      display: flex;
-    }
-    
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 3px solid rgba(255,255,255,0.1);
-      border-top-color: var(--accent-purple);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    .loading-text {
-      position: absolute;
-      bottom: 20%;
-      color: var(--text-secondary);
-      font-size: 13px;
-    }
-    
-    /* 扫描进度条 */
+    /* 扫描进度 */
     .scan-progress {
-      background: var(--bg-card);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 20px;
       display: none;
+      margin-bottom: 20px;
     }
     
     .scan-progress.active {
       display: block;
     }
     
+    .scan-progress .bubble {
+      padding: 15px 20px;
+    }
+    
     .scan-progress .label {
-      font-size: 11px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
     }
     
     .progress-bar {
-      height: 6px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 3px;
+      height: 10px;
+      background: #e0e0e0;
+      border-radius: 5px;
+      border: 2px solid var(--border-color);
       overflow: hidden;
     }
     
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-red));
       width: 0%;
       transition: width 0.3s ease;
-      animation: progressPulse 2s ease-in-out infinite;
+      border-radius: 3px;
     }
     
-    @keyframes progressPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-    
-    /* 分区标题 */
-    .section-header {
+    /* 按钮气泡 */
+    .btn-bubble {
+      background: var(--accent-purple);
+      color: white;
+      border: none;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
       margin-bottom: 12px;
     }
     
+    .btn-bubble:hover {
+      transform: scale(0.98) translate(3px, 3px);
+      box-shadow: 0 0 0 var(--shadow-color);
+      background: #9458d0;
+    }
+    
+    .btn-bubble:active {
+      transform: scale(0.95) translate(6px, 6px);
+      box-shadow: none;
+    }
+    
+    .btn-bubble:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color) !important;
+    }
+    
+    .btn-bubble.secondary {
+      background: var(--accent-yellow);
+      color: #1a1a2e;
+    }
+    
+    .btn-bubble.secondary:hover {
+      background: #ffb142;
+    }
+    
+    .btn-bubble.green {
+      background: var(--accent-green);
+    }
+    
+    .btn-bubble.green:hover {
+      background: #26de81;
+    }
+    
+    /* 墓碑列表 */
+    .corpses-section {
+      margin-top: 10px;
+    }
+    
     .section-title {
-      font-size: 13px;
-      color: var(--text-secondary);
-      font-weight: 600;
+      font-size: 1rem;
+      font-weight: 900;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
     
-    .refresh-btn {
-      background: none;
-      border: none;
-      color: var(--accent-purple);
-      cursor: pointer;
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    
-    .refresh-btn:hover {
-      background: rgba(108, 92, 231, 0.2);
-    }
-    
-    /* 墓碑列表 */
     .corpses-list {
-      background: var(--bg-card);
-      border-radius: var(--border-radius);
-      padding: 12px;
-      max-height: 280px;
+      max-height: 200px;
       overflow-y: auto;
     }
     
     .corpses-list::-webkit-scrollbar {
-      width: 4px;
-    }
-    
-    .corpses-list::-webkit-scrollbar-track {
-      background: transparent;
+      width: 6px;
     }
     
     .corpses-list::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.2);
-      border-radius: 2px;
+      background: var(--border-color);
+      border-radius: 3px;
     }
     
-    .corpse-item {
-      background: rgba(255,255,255,0.04);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 8px;
-      transition: all 0.2s ease;
+    .corpse-bubble {
+      background: var(--bubble-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 15px;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      box-shadow: 4px 4px 0 var(--shadow-color);
+      transition: all 0.15s ease;
       cursor: pointer;
-      border: 1px solid transparent;
     }
     
-    .corpse-item:last-child { 
-      margin-bottom: 0; 
+    .corpse-bubble:hover {
+      transform: scale(0.98) translate(2px, 2px);
+      box-shadow: 0 0 0 var(--shadow-color);
+      background: var(--bubble-hover-bg);
     }
     
-    .corpse-item:hover {
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(108, 92, 231, 0.3);
-      transform: translateX(2px);
+    .corpse-bubble:last-child {
+      margin-bottom: 0;
     }
     
-    .corpse-item .name { 
-      font-size: 13px; 
-      font-weight: 600;
+    .corpse-name {
+      font-weight: 700;
+      font-size: 0.9rem;
       margin-bottom: 6px;
-      color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
     
-    .corpse-item .meta { 
-      font-size: 10px; 
-      color: var(--text-muted);
+    .corpse-meta {
+      font-size: 0.75rem;
+      color: #666;
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
     }
     
-    .corpse-item .meta span {
+    .corpse-meta span {
       display: flex;
       align-items: center;
       gap: 3px;
     }
     
-    .corpse-item .tags {
+    .corpse-tags {
       display: flex;
-      gap: 4px;
-      margin-top: 6px;
+      gap: 5px;
+      margin-top: 8px;
+      flex-wrap: wrap;
     }
     
     .tag {
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(108, 92, 231, 0.2);
-      color: #a29bfe;
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 700;
+      border: 2px solid var(--border-color);
     }
     
     .tag.zombie {
-      background: rgba(214, 48, 49, 0.2);
-      color: #ff7675;
+      background: var(--accent-red);
+      color: white;
+    }
+    
+    .tag.lang {
+      background: #e0e0e0;
     }
     
     /* 空状态 */
-    .empty-state {
-      text-align: center;
+    .empty-bubble {
+      background: var(--bubble-bg);
+      border: 2px dashed var(--border-color);
+      border-radius: 15px;
       padding: 30px 20px;
-      color: var(--text-muted);
+      text-align: center;
+      color: #888;
     }
     
-    .empty-state .icon {
-      font-size: 40px;
+    .empty-bubble .icon {
+      font-size: 2.5rem;
       margin-bottom: 10px;
       opacity: 0.5;
-    }
-    
-    .empty-state p {
-      font-size: 12px;
     }
     
     /* 底部 */
     .footer {
       text-align: center;
-      margin-top: 16px;
-      color: var(--text-muted);
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      margin-top: 15px;
+      font-size: 0.7rem;
+      color: #888;
+      font-weight: 700;
     }
     
-    .footer a {
-      color: var(--accent-purple);
-      text-decoration: none;
-    }
-    
-    /* Toast 通知 */
+    /* Toast */
     .toast {
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%) translateY(100px);
-      background: rgba(0,0,0,0.9);
+      background: #1a1a2e;
       color: white;
       padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 13px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
       opacity: 0;
       transition: all 0.3s ease;
-      z-index: 1001;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
+      z-index: 1000;
+      border: 2px solid var(--border-color);
+      box-shadow: 4px 4px 0 var(--shadow-color);
     }
     
     .toast.show {
@@ -437,121 +408,130 @@
     }
     
     .toast.success {
-      border-color: var(--accent-green);
+      background: var(--accent-green);
     }
     
     .toast.error {
-      border-color: var(--accent-red);
+      background: var(--accent-red);
     }
     
-    /* 脉冲动画 */
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(240, 248, 255, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
     }
     
-    .pulse {
-      animation: pulse 2s ease-in-out infinite;
+    .loading-overlay.active {
+      display: flex;
     }
     
-    /* 响应式 */
-    @media (max-width: 400px) {
-      body {
-        width: 100%;
-        padding: 15px;
-      }
-      
-      .header h1 {
-        font-size: 20px;
-      }
-      
-      .stats-grid {
-        gap: 8px;
-      }
-      
-      .stat-card {
-        padding: 12px;
-      }
-      
-      .stat-card .icon {
-        font-size: 24px;
-      }
-      
-      .stat-card .value {
-        font-size: 22px;
-      }
+    .loading-content {
+      text-align: center;
+    }
+    
+    .loading-spinner {
+      font-size: 3rem;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      margin-top: 15px;
+      font-weight: 700;
+      font-size: 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>🪦 Code Corpses</h1>
-    <p>代码墓地监控 · 守护项目安宁</p>
-    <span class="version-badge" id="version">v1.0</span>
+  <!-- 标题 -->
+  <div class="bubble header-bubble" onclick="visitRandom()">
+    <h1>👻 CODE GRAVEYARD</h1>
+    <p>Watch out for the zombies!</p>
   </div>
   
+  <!-- 统计 -->
   <div class="stats-grid">
-    <div class="stat-card">
-      <span class="icon">📊</span>
+    <div class="bubble stat-bubble">
+      <span class="icon">🪦</span>
+      <div class="label">Total Tombs</div>
       <div class="value" id="total-corpses">--</div>
-      <div class="label">扫描项目</div>
     </div>
-    <div class="stat-card zombie">
-      <span class="icon">🧟</span>
-      <div class="value" id="zombies-today">--</div>
-      <div class="label">诈尸项目</div>
-    </div>
-    <div class="stat-card scan">
-      <span class="icon">🔄</span>
-      <div class="value" id="last-scan">--</div>
-      <div class="label">最近扫描</div>
-    </div>
-    <div class="stat-card">
-      <span class="icon">⭐</span>
-      <div class="value" id="total-stars">--</div>
-      <div class="label">总星数</div>
+    <div class="bubble stat-bubble">
+      <span class="icon">📦</span>
+      <div class="label">Survivors</div>
+      <div class="value" id="survivors">--</div>
     </div>
   </div>
   
-  <div class="actions">
-    <button class="btn primary" id="scan-btn" onclick="scanCemetery()">
-      <span class="btn-icon">🔍</span>
-      扫描墓地
-    </button>
-    <button class="btn secondary" onclick="openSettings()">
-      <span class="btn-icon">⚙️</span>
-      设置
-    </button>
-    <button class="btn success" onclick="sendReport()">
-      <span class="btn-icon">📤</span>
-      发送报告
-    </button>
+  <!-- 诈尸统计 -->
+  <div class="bubble zombie-bubble" onclick="showZombies()">
+    <div class="zombie-text">
+      <span>🧟</span>
+      <span id="resurrected">0</span>
+      <span>RESURRECTED!</span>
+    </div>
+    <div class="lightning">⚡</div>
   </div>
   
+  <!-- 扫描状态 -->
+  <div class="scan-tag">
+    <div class="scan-info" id="scan-info">
+      📊 SCANNED: <span id="last-scan">NEVER</span>
+    </div>
+  </div>
+  
+  <!-- 扫描进度 -->
   <div class="scan-progress" id="scan-progress">
-    <div class="label">
-      <span>🔄 正在扫描 GitHub...</span>
-      <span id="scan-percent">0%</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progress-fill"></div>
-    </div>
-  </div>
-  
-  <div class="section-header">
-    <div class="section-title">📜 最新墓碑</div>
-    <button class="refresh-btn" onclick="loadCorpses()">刷新 ⟳</button>
-  </div>
-  
-  <div class="corpses-list" id="corpses-list">
-    <div class="empty-state">
-      <div class="icon">🪦</div>
-      <p>暂无墓碑数据<br>点击上方按钮开始扫描</p>
+    <div class="bubble">
+      <div class="label">
+        <span>🔄 SCANNING...</span>
+        <span id="scan-percent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
     </div>
   </div>
   
+  <!-- 操作按钮 -->
+  <div class="bubble btn-bubble" id="scan-btn" onclick="scanCemetery()">
+    🔍 SCAN NOW
+  </div>
+  
+  <div class="bubble btn-bubble secondary" onclick="openSettings()">
+    ⚙️ SETTINGS
+  </div>
+  
+  <div class="bubble btn-bubble green" onclick="sendReport()">
+    📤 SEND REPORT
+  </div>
+  
+  <!-- 墓碑列表 -->
+  <div class="corpses-section">
+    <div class="section-title">📜 LATEST TOMBS</div>
+    <div class="corpses-list" id="corpses-list">
+      <div class="empty-bubble">
+        <div class="icon">🪦</div>
+        <p>No tombs yet...<br>Start scanning!</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 底部 -->
   <div class="footer">
-    <span>🪦 代码千古事，得失寸心知</span>
+    🪦 CODE GRAVEYARD v<span id="version">1.0</span>
   </div>
 
   <!-- Toast -->
@@ -559,8 +539,10 @@
 
   <!-- Loading Overlay -->
   <div class="loading-overlay" id="loading">
-    <div class="spinner"></div>
-    <div class="loading-text">正在处理...</div>
+    <div class="loading-content">
+      <div class="loading-spinner">🪦</div>
+      <div class="loading-text" id="loading-text">Scanning...</div>
+    </div>
   </div>
 
   <script>
@@ -577,27 +559,27 @@
       }, 3000);
     }
     
-    // 显示/隐藏加载
-    function setLoading(show, text = '正在处理...') {
+    // 显示/隐藏 Loading
+    function setLoading(show, text = 'Scanning...') {
       const loading = document.getElementById('loading');
-      loading.querySelector('.loading-text').textContent = text;
+      document.getElementById('loading-text').textContent = text;
       if (show) loading.classList.add('active');
       else loading.classList.remove('active');
     }
     
     // 格式化时间
     function formatTimeAgo(dateStr) {
-      if (!dateStr || dateStr === '未知' || dateStr === '从未扫描') return '未知';
+      if (!dateStr || dateStr === '未知' || dateStr === 'Never' || dateStr === 'NEVER') return 'NEVER';
       
       try {
         const date = new Date(dateStr);
         const now = new Date();
         const diff = Math.floor((now - date) / 1000);
         
-        if (diff < 60) return '刚刚';
-        if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
-        if (diff < 86400) return Math.floor(diff / 3600) + ' 小时前';
-        return Math.floor(diff / 86400) + ' 天前';
+        if (diff < 60) return 'JUST NOW';
+        if (diff < 3600) return Math.floor(diff / 60) + ' MINS AGO';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' HOURS AGO';
+        return Math.floor(diff / 86400) + ' DAYS AGO';
       } catch (e) {
         return dateStr;
       }
@@ -607,17 +589,17 @@
     async function loadStats() {
       try {
         const stats = await invoke('get_stats');
-        document.getElementById('total-corpses').textContent = (stats.total_assets || 0).toString();
-        document.getElementById('zombies-today').textContent = (stats.total_tombstones || 0).toString();
+        document.getElementById('total-corpses').textContent = formatNumber(stats.total_tombstones || 0);
+        document.getElementById('survivors').textContent = formatNumber(stats.total_assets || 0);
+        document.getElementById('resurrected').textContent = formatNumber(stats.resurrected || 0);
         document.getElementById('last-scan').textContent = formatTimeAgo(stats.last_scan);
-        document.getElementById('total-stars').textContent = (stats.resurrected || 0).toString();
       } catch (e) {
         console.log('获取统计失败:', e);
-        // 使用默认数据
+        // 默认数据
         document.getElementById('total-corpses').textContent = '0';
-        document.getElementById('zombies-today').textContent = '0';
-        document.getElementById('last-scan').textContent = '未知';
-        document.getElementById('total-stars').textContent = '0';
+        document.getElementById('survivors').textContent = '0';
+        document.getElementById('resurrected').textContent = '0';
+        document.getElementById('last-scan').textContent = 'NEVER';
       }
     }
     
@@ -625,9 +607,9 @@
     async function loadVersion() {
       try {
         const version = await invoke('get_version');
-        document.getElementById('version').textContent = 'v' + version;
+        document.getElementById('version').textContent = version || '1.0';
       } catch (e) {
-        document.getElementById('version').textContent = 'v1.0';
+        document.getElementById('version').textContent = '1.0';
       }
     }
     
@@ -639,41 +621,37 @@
         
         if (!corpses || corpses.length === 0) {
           list.innerHTML = `
-            <div class="empty-state">
+            <div class="empty-bubble">
               <div class="icon">🪦</div>
-              <p>暂无墓碑数据<br>使用 CLI 创建墓碑</p>
+              <p>No tombs yet...<br>Start scanning!</p>
             </div>
           `;
           return;
         }
         
-        // 统计复活数量作为"星数"
-        const resurrected = corpses.filter(c => c.resurrected_at).length;
-        document.getElementById('total-stars').textContent = resurrected > 0 ? resurrected.toString() : '--';
-        
         list.innerHTML = corpses.map(c => `
-          <div class="corpse-item" onclick="openPath('${c.original_path}')">
-            <div class="name">
-              ${c.language ? `<span style="color: ${getLangColor(c.language)}">●</span>` : ''}
-              ${c.name}
+          <div class="corpse-bubble" onclick="openPath('${c.original_path}')">
+            <div class="corpse-name">
+              ${c.language ? `<span style="color:${getLangColor(c.language)}">●</span>` : ''}
+              ${c.name || 'Unknown'}
             </div>
-            <div class="meta">
-              <span>💀 ${c.cause_of_death || c.cause || '未知死因'}</span>
-              <span>📅 ${c.died_at ? c.died_at.split('T')[0] : '未知'}</span>
+            <div class="corpse-meta">
+              <span>💀 ${c.cause_of_death || c.cause || 'Unknown'}</span>
+              <span>📅 ${c.died_at ? c.died_at.split('T')[0] : 'Unknown'}</span>
             </div>
-            <div class="tags">
-              ${c.resurrected_at ? '<span class="tag zombie">🧟 已复活</span>' : ''}
-              ${c.language ? `<span class="tag">${c.language}</span>` : ''}
-              ${c.tags ? c.tags.slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('') : ''}
+            <div class="corpse-tags">
+              ${c.resurrected_at ? '<span class="tag zombie">🧟 ZOMBIE</span>' : ''}
+              ${c.language ? `<span class="tag lang">${c.language}</span>` : ''}
+              ${c.tags ? c.tags.slice(0, 3).map(t => `<span class="tag lang">${t}</span>`).join('') : ''}
             </div>
           </div>
         `).join('');
       } catch (e) {
         console.log('获取墓碑失败:', e);
         document.getElementById('corpses-list').innerHTML = `
-          <div class="empty-state">
+          <div class="empty-bubble">
             <div class="icon">🪦</div>
-            <p>暂无墓碑数据<br>使用 cemetery tombstone --create 创建</p>
+            <p>No tombs yet...<br>Start scanning!</p>
           </div>
         `;
       }
@@ -716,6 +694,33 @@
       }
     }
     
+    // 随机访问墓碑
+    async function visitRandom() {
+      try {
+        const result = await invoke('visit_random');
+        if (result && result.name) {
+          showToast(`🪦 ${result.name}`, 'success');
+        }
+      } catch (e) {
+        showToast('🪦 No tombs to visit', 'error');
+      }
+    }
+    
+    // 显示诈尸列表
+    async function showZombies() {
+      try {
+        const corpses = await invoke('get_recent_corpses', { limit: 20 });
+        const zombies = corpses.filter(c => c.resurrected_at);
+        if (zombies.length > 0) {
+          showToast(`🧟 ${zombies.length} zombies found!`, 'success');
+        } else {
+          showToast('🧟 No zombies yet', 'default');
+        }
+      } catch (e) {
+        showToast('🧟 No zombies', 'default');
+      }
+    }
+    
     // 扫描墓地
     async function scanCemetery() {
       if (isScanning) return;
@@ -727,33 +732,33 @@
       const progressPercent = document.getElementById('scan-percent');
       
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;"></span> 扫描中...';
+      btn.style.opacity = '0.6';
       progress.classList.add('active');
       
       try {
         const result = await invoke('trigger_scan');
         
         // 模拟进度
-        for (let i = 0; i <= 100; i += 20) {
+        for (let i = 0; i <= 100; i += 15) {
           progressFill.style.width = i + '%';
           progressPercent.textContent = i + '%';
-          await new Promise(r => setTimeout(r, 100));
+          await new Promise(r => setTimeout(r, 80));
         }
         
         if (result.success) {
-          showToast(`✅ ${result.message}`, 'success');
+          showToast(`✅ ${result.message || 'Scan complete!'}`, 'success');
           await loadStats();
           await loadCorpses();
         } else {
-          showToast('❌ 扫描失败: ' + result.message, 'error');
+          showToast('❌ Scan failed!', 'error');
         }
       } catch (e) {
         console.log('扫描失败:', e);
-        showToast('❌ 扫描失败: ' + (e.message || e), 'error');
+        showToast('❌ Scan failed: ' + (e.message || e), 'error');
       } finally {
         isScanning = false;
         btn.disabled = false;
-        btn.innerHTML = '<span class="btn-icon">🔍</span> 扫描墓地';
+        btn.style.opacity = '1';
         setTimeout(() => {
           progress.classList.remove('active');
           progressFill.style.width = '0%';
@@ -763,25 +768,25 @@
     
     // 打开设置
     async function openSettings() {
-      setLoading(true, '加载配置中...');
+      setLoading(true, 'Loading config...');
       try {
         const config = await invoke('load_config');
         
         const token = prompt(
-          'GitHub Token 设置\n\n' +
-          '输入你的 GitHub Personal Access Token (可选):\n' +
-          '- 需要 repo 和 read:org 权限\n' +
-          '- 提高 API 访问速率限制\n\n' +
-          '当前 Token: ' + (config.github_token ? '已设置 ✓' : '未设置')
+          'GitHub Token Setup\n\n' +
+          'Enter your GitHub Personal Access Token:\n' +
+          '- Needs repo and read:org permissions\n' +
+          '- Increases API rate limit\n\n' +
+          'Current Token: ' + (config.github_token ? 'Set ✓' : 'Not set')
         );
         
         if (token !== null) {
           await invoke('update_github_token', { token: token.trim() });
-          showToast('✅ Token 已更新', 'success');
+          showToast('✅ Token updated!', 'success');
         }
       } catch (e) {
         console.log('加载配置失败:', e);
-        showToast('❌ 加载配置失败', 'error');
+        showToast('❌ Config error', 'error');
       } finally {
         setLoading(false);
       }
@@ -789,13 +794,13 @@
     
     // 发送报告
     async function sendReport() {
-      setLoading(true, '正在生成报告...');
+      setLoading(true, 'Generating report...');
       try {
         const result = await invoke('send_report');
         showToast('📤 ' + result, 'success');
       } catch (e) {
         console.log('发送失败:', e);
-        showToast('❌ 发送失败', 'error');
+        showToast('❌ Send failed', 'error');
       } finally {
         setLoading(false);
       }
