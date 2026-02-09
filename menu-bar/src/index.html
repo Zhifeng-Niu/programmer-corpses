@@ -587,7 +587,7 @@
     
     // 格式化时间
     function formatTimeAgo(dateStr) {
-      if (!dateStr || dateStr === '从未扫描') return '未知';
+      if (!dateStr || dateStr === '未知' || dateStr === '从未扫描') return '未知';
       
       try {
         const date = new Date(dateStr);
@@ -607,11 +607,17 @@
     async function loadStats() {
       try {
         const stats = await invoke('get_stats');
-        document.getElementById('total-corpses').textContent = stats.total || '0';
-        document.getElementById('zombies-today').textContent = stats.zombies || '0';
+        document.getElementById('total-corpses').textContent = (stats.total_assets || 0).toString();
+        document.getElementById('zombies-today').textContent = (stats.total_tombstones || 0).toString();
         document.getElementById('last-scan').textContent = formatTimeAgo(stats.last_scan);
+        document.getElementById('total-stars').textContent = (stats.resurrected || 0).toString();
       } catch (e) {
         console.log('获取统计失败:', e);
+        // 使用默认数据
+        document.getElementById('total-corpses').textContent = '0';
+        document.getElementById('zombies-today').textContent = '0';
+        document.getElementById('last-scan').textContent = '未知';
+        document.getElementById('total-stars').textContent = '0';
       }
     }
     
@@ -621,7 +627,7 @@
         const version = await invoke('get_version');
         document.getElementById('version').textContent = 'v' + version;
       } catch (e) {
-        // 忽略
+        document.getElementById('version').textContent = 'v1.0';
       }
     }
     
@@ -635,35 +641,41 @@
           list.innerHTML = `
             <div class="empty-state">
               <div class="icon">🪦</div>
-              <p>暂无墓碑数据<br>点击上方按钮开始扫描</p>
+              <p>暂无墓碑数据<br>使用 CLI 创建墓碑</p>
             </div>
           `;
           return;
         }
         
-        // 计算总星数
-        let totalStars = corpses.reduce((sum, c) => sum + (c.stars || 0), 0);
-        document.getElementById('total-stars').textContent = totalStars > 0 ? formatNumber(totalStars) : '--';
+        // 统计复活数量作为"星数"
+        const resurrected = corpses.filter(c => c.resurrected_at).length;
+        document.getElementById('total-stars').textContent = resurrected > 0 ? resurrected.toString() : '--';
         
         list.innerHTML = corpses.map(c => `
-          <div class="corpse-item" onclick="openRepo('${c.repo_url}')">
+          <div class="corpse-item" onclick="openPath('${c.original_path}')">
             <div class="name">
               ${c.language ? `<span style="color: ${getLangColor(c.language)}">●</span>` : ''}
               ${c.name}
             </div>
             <div class="meta">
-              <span>💀 ${c.cause}</span>
-              <span>⭐ ${c.stars}</span>
-              <span>📅 ${c.date}</span>
+              <span>💀 ${c.cause_of_death || c.cause || '未知死因'}</span>
+              <span>📅 ${c.died_at ? c.died_at.split('T')[0] : '未知'}</span>
             </div>
             <div class="tags">
-              <span class="tag zombie">🧟 诈尸</span>
+              ${c.resurrected_at ? '<span class="tag zombie">🧟 已复活</span>' : ''}
               ${c.language ? `<span class="tag">${c.language}</span>` : ''}
+              ${c.tags ? c.tags.slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('') : ''}
             </div>
           </div>
         `).join('');
       } catch (e) {
         console.log('获取墓碑失败:', e);
+        document.getElementById('corpses-list').innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🪦</div>
+            <p>暂无墓碑数据<br>使用 cemetery tombstone --create 创建</p>
+          </div>
+        `;
       }
     }
     
@@ -693,13 +705,13 @@
       return colors[lang] || '#888888';
     }
     
-    // 打开仓库链接
-    async function openRepo(url) {
-      if (url && url !== 'https://github.com') {
+    // 打开文件路径
+    async function openPath(path) {
+      if (path && path !== 'unknown') {
         try {
-          await invoke('open_url', { url });
+          await invoke('shell_open', { path: path });
         } catch (e) {
-          await invoke('shell_open', { path: url });
+          console.log('打开路径失败:', e);
         }
       }
     }
@@ -722,7 +734,7 @@
         const result = await invoke('trigger_scan');
         
         // 模拟进度
-        for (let i = 0; i <= 100; i += 10) {
+        for (let i = 0; i <= 100; i += 20) {
           progressFill.style.width = i + '%';
           progressPercent.textContent = i + '%';
           await new Promise(r => setTimeout(r, 100));

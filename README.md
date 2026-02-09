@@ -1,6 +1,6 @@
-# 🪦 Code Corpses - 代码尸体集中营
+# 🪦 Code Corpses - 代码墓地 (Universal AI Capability Module)
 
-> *"这里的代码不是死了，只是等着被AI翻牌子"* 🧟‍♂️
+> *"死代码不是终点，是等 AI 翻牌子的轮回中转站"* 🧟‍♂️
 
 [![Vibe: Happy Coding](https://img.shields.io/badge/vibe-Happy%20Coding-purple?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
@@ -8,66 +8,126 @@
 
 ---
 
-## 🧠 核心哲学
+## 🎯 核心特性：通用 AI 能力模块
 
-> **De-location Storage** · **Tombstone as Epitaph** · **Abstract Asset Layer**
+**让任何 AI Agent 都能使用代码墓地：Claude、GPT、OpenClaw、本地模型...**
 
-| 理念 | 含义 |
-|------|------|
-| 🌐 **去位置化存储** | 不关心代码在哪，只关心它存在 |
-| 🪦 **墓碑即铭文** | 死代码留下墓碑 + 标签 + 摘要 = 可搜索的遗产 |
-| 📦 **抽象资产层** | 代码、文本、想法、模板都是"数字资产" |
-
-**一句话：** 代码死了不要紧，留下墓碑，随时可以被搜索、被复活、被 AI 翻牌子。
-
----
-
-## 📜 名字的生前遗书
-
-| 版本 | 名字 | 死因 |
-|------|------|------|
-| v1.0 | 🪦 **programmer-cemetery** | "墓地"听起来像程序员死了 |
-| v2.0 | 🪦 **programmer-corpses** | **程序员没死，代码死了** 🧟‍♂️ |
-| v2.5+ | 🪦 **code-corpses** | 名字不重要，开心最重要 😄 |
-| v3.0 | 🪦 **code-corpses** | 去位置化 + 墓碑注册 + 资产索引 🧠 |
+```typescript
+interface CemeteryCapability {
+  analyzeCode(path: string): Promise<AnalysisResult>
+  createTombstone(path: string, cause: string): Promise<Tombstone>
+  detectZombie(newCode: string): Promise<ZombieResult>
+  listAssets(filter?: AssetFilter): Promise<Asset[]>
+  search(query: string): Promise<SearchResult[]>
+  getSummary(): Promise<CemeterySummary>
+}
+```
 
 ---
 
-## 💀 这是什么鬼？
+## 🚀 四种使用方式
 
-**AI 时代代码太多了，写完就丢，丢哪儿？**
+### 1️⃣ REST API (最通用)
 
-丢进 **代码尸体集中营** 🪦
+```bash
+# 启动 API 服务器
+npm run serve:api
 
-- 📦 任何路径、GitHub 仓库、云存储的代码 → 统一索引
-- 🪦 删除的代码 → 创建墓碑 → 墓志铭 + 标签 + 摘要
-- 🔍 搜索所有资产 → 不管在哪里，都能找到
-- 🧟 死掉的代码不是真死 → 随时可以被搜索和复活
+# API 端点
+GET  /api/health          # 健康检查
+GET  /api/summary         # 获取统计摘要
+GET  /api/assets          # 列出资产
+GET  /api/tombstones      # 列出墓碑
+GET  /api/search?q=auth   # 搜索
+POST /api/analyze         # 分析代码
+POST /api/tombstone       # 创建墓碑
+POST /api/detect-zombie   # 检测诈尸
+POST /api/index           # 索引目录
+```
 
-> **核心哲学：** 墓地不是终点，是代码的"轮回中转站"
+**curl 示例：**
+```bash
+# 获取统计摘要
+curl http://localhost:3000/api/summary
+
+# 搜索代码
+curl "http://localhost:3000/api/search?q=auth"
+
+# 分析代码
+curl -X POST http://localhost:3000/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"path": "./src/old-module.ts"}'
+```
+
+### 2️⃣ MCP Server (Claude Code 专用)
+
+```bash
+# 启动 MCP Server
+npm run serve:mcp
+
+# Claude Code 配置
+# 在 claude_code_mcp.json 中添加:
+{
+  "mcpServers": {
+    "cemetery": {
+      "command": "npx",
+      "args": ["ts-node", "src/cli.ts", "serve", "mcp"]
+    }
+  }
+}
+```
+
+**可用工具：**
+- `analyze_code` - 分析代码是否已死
+- `create_tombstone` - 为代码创建墓碑
+- `detect_zombie` - 检测诈尸代码
+- `list_assets` - 列出资产
+- `search_cemetery` - 搜索墓地
+- `get_summary` - 获取统计摘要
+- `index_path` - 索引目录
+- `visit_tombstone` - 随机访问墓碑
+
+### 3️⃣ OpenAI Functions (GPT-4 专用)
+
+```typescript
+// 在你的 GPT 中配置函数定义
+const functions = [
+  {
+    name: "cemetery_analyze_code",
+    description: "分析代码是否已死...",
+    parameters: {
+      type: "object",
+      properties: {
+        path: { type: "string", description: "代码路径" }
+      }
+    }
+  },
+  // ... 更多函数定义
+]
+```
+
+### 4️⃣ CLI (人类专用)
+
+```bash
+# 索引目录
+cemetery index --path ./src
+
+# 分析代码
+cemetery analyze ./src/old-module.ts
+
+# 创建墓碑
+cemetery tombstone --create ./src/dead.ts --cause "deprecated"
+
+# 搜索
+cemetery search auth
+
+# 查看统计
+cemetery stats
+```
 
 ---
 
-## ✨ 功能总览
-
-| 功能 | 说明 | 状态 |
-|------|------|------|
-| 📦 **统一资产索引** | 索引本地/GitHub/云端的所有代码资产 | ✅ NEW |
-| 🪦 **墓碑注册处** | 为死代码创建墓碑，保留可搜索遗产 | ✅ NEW |
-| 🔍 **全局搜索** | 跨所有资产和墓碑搜索 | ✅ NEW |
-| 🏷️ **智能标签** | 自动提取语言、路径、内容标签 | ✅ NEW |
-| 📊 **资产统计** | 按类型、语言、来源统计所有资产 | ✅ NEW |
-| 🤖 **AI 自动扫描** | 90天没动的代码自动标记 | ✅ |
-| 📥 **移送太平间** | 死代码送去墓地，原项目干干净净 | ✅ |
-| 🔄 **诈尸检测** | 旧代码被新项目复用时通知你 | ✅ |
-| 🧟 **增强诈尸检测** | 多种算法检测代码复活 | ✅ |
-| 🪦 **墓碑生成器** | 6种风格精美墓碑 | ✅ |
-| 🏛️ **墓地搜索引擎** | 智能搜索死代码 | ✅ |
-| 🎁 **惊喜彩蛋** | 发现自己的代码诈尸了 | ✅ |
-
----
-
-## 🚀 快速开始
+## 📦 快速开始
 
 ### 安装
 
@@ -75,239 +135,119 @@
 npm install -g code-corpses
 ```
 
-### 核心命令
+### 初始化墓地
 
 ```bash
-# 📦 索引资产 - 把代码丢进管理系统
-cemetery index --path ./my-project/src
-cemetery index --github Zhifeng-Niu/programmer-corpses
+# 索引当前目录
+cemetery index --path .
 
-# 🪦 创建墓碑 - 为死代码立碑
-cemetery tombstone --create ./src/old-auth.ts --cause "被新认证模块替代"
-cemetery tombstone --create ./lib/utils.ts --cause "deprecated" --tags "auth,legacy"
-
-# 🔍 搜索 - 在所有资产和墓碑中搜索
-cemetery search auth
-cemetery search "typescript utils"
-
-# 📊 查看资产
-cemetery assets --type code
-cemetery assets stats
-
-# 🪦 墓碑管理
-cemetery tombstone list
-cemetery tombstone stats
-```
-
-### 经典命令
-
-```bash
-# 扫墓 - 随机访问一个墓碑
-cemetery --visit
-
-# 查看墓地统计
-cemetery --stats
-
-# 扫描 GitHub 找死代码
-cemetery --scan
-
-# 检测诈尸
-cemetery --detect my-project
-
-# 初始化配置
-cemetery --init
+# 或启动 API 服务器
+npm run serve:api
 ```
 
 ---
 
-## 📖 CLI 命令详解
-
-### 📦 资产索引命令
-
-| 命令 | 说明 | 示例 |
-|------|------|------|
-| `index --path <path>` | 索引本地目录 | `cemetery index --path ./src` |
-| `index --github <repo>` | 索引 GitHub 仓库 | `cemetery index --github owner/repo` |
-| `search <query>` | 搜索所有资产和墓碑 | `cemetery search "auth utils"` |
-| `assets --type <type>` | 按类型列出资产 | `cemetery assets --type code` |
-| `assets stats` | 资产统计 | `cemetery assets stats` |
-
-**资产类型:** `code` `text` `config` `template` `idea` `snippet` `document`
-
-### 🪦 墓碑管理命令
-
-| 命令 | 说明 | 示例 |
-|------|------|------|
-| `tombstone --create <path> --cause <reason>` | 创建墓碑 | `cemetery tombstone --create ./old.ts --cause "deprecated"` |
-| `tombstone list` | 列出所有墓碑 | `cemetery tombstone list` |
-| `tombstone stats` | 墓碑统计 | `cemetery tombstone stats` |
-
-**可选参数:** `--epitaph <text>` `--tags <t1,t2>`
-
-### 🎮 经典命令
-
-| 命令 | 说明 |
-|------|------|
-| `--visit` | 🎲 随机访问一个墓碑 |
-| `--stats` | 📊 查看墓地统计数据 |
-| `--anniversary` | 🎂 查看今日忌日的墓碑 |
-| `--resurrect <id>` | 🔄 检测墓碑能否复活 |
-| `--egg <code>` | 🎁 触发彩蛋 |
-| `--scan` | 🕵️ 扫描 GitHub 找死代码 |
-| `--detect <repo>` | 🧟 检测诈尸 |
-| `--init` | ⚙️ 初始化配置 |
-
----
-
-## 📸 效果预览
-
-### 索引资产
-
-```
-$ cemetery index --path ./src
-
-📂 索引 /Users/me/project/src...
-
-✅ 索引完成!
-   新增: 42 个资产
-   跳过: 3 个 (已存在)
-   总计: 45 个资产
-```
-
-### 创建墓碑
-
-```
-$ cemetery tombstone --create ./src/old-auth.ts --cause "被新认证模块替代"
-
-🪦 ─────────────────────────────────────
-   old-auth.ts [tomb-a3f8c2e1]
-   ─────────────────────────────────────
-   💀 死因: 被新认证模块替代
-   📜 墓志铭: "不是我不好，是重构的人觉得可以更好"
-   📍 原位置: ./src/old-auth.ts
-   📅 死亡日期: 2026-02-09
-   💻 语言: TypeScript
-   📏 行数: 156
-   🏷️ 标签: #typescript #auth #old-auth
-   📝 摘要: old-auth.ts: 3 exports, 2 functions (156 lines)
-   📊 状态: 💀 已死亡
-🪦 ─────────────────────────────────────
-
-✅ 墓碑已创建: tomb-a3f8c2e1
-```
-
-### 搜索
-
-```
-$ cemetery search auth
-
-🔍 搜索: "auth"
-
-📦 资产匹配 (2):
-
-  🟢 auth.ts [code] TypeScript
-     📍 /Users/me/project/src/auth.ts
-     📝 Authentication module
-     🏷️ #typescript #auth #code
-
-  💀 old-auth.ts [code] TypeScript
-     📍 /Users/me/project/src/old-auth.ts
-     📝 Legacy auth module
-     🏷️ #typescript #auth #legacy
-
-🪦 墓碑匹配 (1):
-
-  💀 old-auth.ts [tomb-a3f8c2e1]
-     💀 被新认证模块替代
-     📜 "不是我不好，是重构的人觉得可以更好"
-     🏷️ #typescript #auth #old-auth
-```
-
----
-
-## 📦 项目结构
+## 🏗️ 项目结构
 
 ```
 programmer-corpses/
-├── README.md                    # 主文档
-├── CHANGELOG.md                 # 改动历史
-├── LICENSE                      # MIT 开源协议
-├── package.json                 # npm 配置
-├── tsconfig.json                # TypeScript 配置
-├── src/                         # 核心代码
-│   ├── index.ts                # CLI 入口 (统一命令路由)
-│   ├── asset-index.ts          # 📦 统一资产索引 (NEW)
-│   ├── tombstone-registry.ts   # 🪦 墓碑注册处 (NEW)
-│   ├── scanner.ts              # 🤖 AI 扫描器
-│   ├── zombie.ts               # 🧟 诈尸检测
-│   ├── enhanced-zombie.ts      # 🧪 增强版诈尸检测
-│   ├── tombstone-generator.ts  # 🪦 墓碑生成器 (6种风格)
-│   ├── cemetery-search.ts      # 🏛️ 墓地搜索引擎
-│   └── mortuary.ts             # 🏛️ 代码太平间
-├── .cemetery/                   # 本地数据存储
-│   ├── asset-index.json        # 资产索引数据
-│   └── tombstone-registry.json # 墓碑注册数据
-└── dist/                        # 编译输出
+├── src/
+│   ├── cli.ts                    # CLI 入口 + 统一命令路由
+│   ├── core/
+│   │   ├── interfaces.ts         # 🌟 CemeteryCapability 接口定义
+│   │   ├── analyzer.ts           # 🤖 代码分析器
+│   │   ├── tombstone.ts          # 🪦 墓碑生成器
+│   │   ├── zombie.ts             # 🧟 诈尸检测器
+│   │   └── indexer.ts            # 📦 资产索引器
+│   ├── adapters/
+│   │   ├── mcp-server.ts         # 🤖 MCP Server 适配器
+│   │   ├── openai-functions.ts   # 🎯 OpenAI Functions 适配器
+│   │   └── rest-api.ts           # 🌐 REST API 适配器
+│   ├── asset-index.ts            # 📦 统一资产索引
+│   ├── tombstone-registry.ts     # 🪦 墓碑注册处
+│   └── dashboard.ts              # 📊 仪表板生成器
+├── menu-bar/                     # 🍎 Menu Bar 应用
+├── package.json
+└── README.md
+```
+
+---
+
+## 🎮 核心命令
+
+```bash
+# 📦 索引资产
+cemetery index --path ./my-project/src
+cemetery index --github owner/repo
+
+# 🪦 创建墓碑
+cemetery tombstone --create ./src/old-auth.ts --cause "被新认证模块替代"
+
+# 🔍 搜索
+cemetery search auth
+cemetery search "typescript utils"
+
+# 📊 统计
+cemetery stats
+cemetery digest
+
+# 🕵️ 分析
+cemetery analyze ./src/old-module.ts
 ```
 
 ---
 
 ## 🎯 使用场景
 
-| 场景 | 命令 |
-|------|------|
-| 新项目开始，索引所有代码 | `cemetery index --path ./src` |
-| 索引 GitHub 上的开源项目 | `cemetery index --github owner/repo` |
-| 删除旧代码前，创建墓碑 | `cemetery tombstone --create ./old.ts --cause "不再需要"` |
-| 找一个之前写过的功能 | `cemetery search "认证 登录"` |
-| 看看项目里有多少代码资产 | `cemetery assets stats` |
-| 查看所有已死代码 | `cemetery tombstone list` |
-| 随机逛逛墓地 | `cemetery --visit` |
+| 场景 | AI Agent 使用方式 |
+|------|------------------|
+| 分析代码是否已死 | `analyze_code(path)` |
+| 为死代码创建墓碑 | `create_tombstone(path, cause)` |
+| 检测代码是否诈尸 | `detect_zombie(newCode)` |
+| 搜索墓地 | `search_cemetery(query)` |
+| 获取统计摘要 | `get_summary()` |
+| 索引新目录 | `index_path(path)` |
+| 随机访问墓碑 | `visit_tombstone()` |
 
 ---
 
-## 🌐 扫描配置
-
-创建 `cemetery.config.json`：
-
-```json
-{
-  "token": "ghp_xxxxx",
-  "owner": "your-username",
-  "repos": ["repo1", "repo2"],
-  "thresholdDays": 90,
-  "notifyChannel": "telegram",
-  "autoArchive": true
-}
-```
-
----
-
-## 🤝 欢迎一起维护！
-
-**这个项目是大家的，快乐是开源的 🌍**
+## 🌐 菜单栏应用
 
 ```bash
-# 1. Fork 这个项目
-# 2. 创建你的分支
-# 3. 写点快乐的代码
-# 4. 提交 PR
-# 5. 等待诈尸... 哦不，是等待合并 🎉
+# 开发模式
+cd menu-bar
+npm run dev
+
+# 构建
+cd menu-bar
+npm run build
 ```
+
+菜单栏显示：
+- 🪦 总墓碑数
+- 📦 存活资产
+- 🧟 复活数量
+- 📊 最近扫描时间
 
 ---
 
-```
-   死  掉  的  代  码  不  是  尸  体
-   是  等  着  被  A  I  翻  牌  子  的  潜  力  股
-```
+## 🎉 哲学理念
+
+> **Human Off the Loop: AI works autonomously, humans only see results**
+
+- ✅ 快乐编程 (Happy Vibe Coding)
+- ✅ 即插即用 (Plug-and-play for any AI)
+- ✅ 自动化优先 (Mostly automatic)
+- ✅ 代码墓地即服务 (Cemetery as a Service)
 
 ---
 
-**一起让代码尸体们死得其所，活得精彩！** 🪦💪
+**死代码不是尸体，是等着被 AI 翻牌子的潜力股！** 🪦💪
+
+---
 
 <p align="center">
-  <img src="https://img.shields.io/badge/墓地-代码尸体集中营-purple?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/状态-诈尸中-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/哲学-去位置化存储-green?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/墓地-Universal%20AI-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/协议-MIT-green?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/状态-Happy%20Coding-purple?style=for-the-badge" />
 </p>

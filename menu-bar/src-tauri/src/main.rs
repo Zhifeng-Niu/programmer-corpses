@@ -5,8 +5,10 @@ use std::fs;
 use std::path::PathBuf;
 use chrono::{DateTime, Utc, Duration};
 
-// 配置文件结构
+// ========== 数据结构 ==========
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Config {
     pub github_token: Option<String>,
     pub target_org: String,
     pub scan_interval: u64,
@@ -24,25 +26,41 @@ impl Default for Config {
     }
 }
 
-// 墓地数据
+// 墓碑数据结构 (与 TypeScript 版本兼容)
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Tombstone {
     pub id: String,
     pub name: String,
-    pub cause: String,
-    pub age: String,
-    pub date: String,
-    pub killer: String,
-    pub repo_url: String,
-    pub stars: u32,
-    pub language: String,
-    pub last_activity: String,
+    pub cause_of_death: String,
+    pub epitaph: String,
+    pub tags: Vec<String>,
+    pub original_path: String,
+    pub language: Option<String>,
+    pub line_count: usize,
+    pub died_at: String,
+    pub resurrected_at: Option<String>,
+    pub resurrected_to: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Asset {
+    pub id: String,
+    pub name: String,
+    pub r#type: String,
+    pub location: String,
+    pub language: Option<String>,
+    pub tags: Vec<String>,
+    pub alive: bool,
+    pub line_count: usize,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Stats {
-    pub total: usize,
-    pub zombies: usize,
+    pub total_assets: usize,
+    pub alive_assets: usize,
+    pub dead_assets: usize,
+    pub total_tombstones: usize,
+    pub resurrected: usize,
     pub last_scan: String,
 }
 
@@ -54,7 +72,219 @@ pub struct ScanResult {
     pub message: String,
 }
 
-// 🧟 诈尸提醒
+// ========== 路径工具 ==========
+
+fn get_config_path() -> PathBuf {
+    let mut path = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
+    path.push("code-corpses");
+    path.push("cemetery.config.json");
+    path
+}
+
+fn get_base_path() -> PathBuf {
+    // 尝试从当前工作目录查找 .cemetery 目录
+    let mut base = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+    if !base.join(".cemetery").exists() {
+        // 尝试父目录
+        base = base.parent().unwrap_or(&base).to_path_buf();
+        if !base.join(".cemetery").exists() {
+            return PathBuf::from(".");
+        }
+    }
+    base
+}
+
+fn get_asset_index_path() -> PathBuf {
+    get_base_path().join(".cemetery/asset-index.json")
+}
+
+fn get_tombstone_registry_path() -> PathBuf {
+    get_base_path().join(".cemetery/tombstone-registry.json")
+}
+
+// ========== 配置命令 ==========
+
+#[tauri::command]
+pub fn load_config() -> Result<Config, String> {
+    let path = get_config_path();
+    
+    if path.exists() {
+        let content = fs::read_to_string(&path)
+            .map_err(|e| format!("读取配置失败: {}", e))?;
+        serde_json::from_str(&content)
+            .map_err(|e| format!("解析配置失败: {}", e))
+    } else {
+        let default_config = Config::default();
+        save_config(&default_config)?;
+        Ok(default_config)
+    }
+}
+
+#[tauri::command]
+pub fn save_config(config: &Config) -> Result<(), String> {
+    let path = get_config_path();
+    
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("创建配置目录失败: {}", e))?;
+    }
+    
+    let content = serde_json::to_string_pretty(config)
+        .map_err(|e| format!("序列化配置失败: {}", e))?;
+    
+    fs::write(&path, content)
+        .map_err(|e| format!("写入配置失败: {}", e))?;
+    
+    Ok(())
+}
+
+#[tauri::command]
+pub fn update_github_token(token: String) -> Result<(), String> {
+    let mut config = load_config()?;
+    config.github_token = Some(token);
+    save_config(&config)
+}
+
+// ========== 墓地数据命令 ==========
+
+#[tauri::command]
+pub fn get_stats() -> Stats {
+    let asset_path = get_asset_index_path();
+    let tombstone_path = get_tombstone_registry_path();
+    
+    let mut total_assets = 0;
+    let mut alive_assets = 0;
+    let mut total_tombstones = 0;
+    let mut resurrected = 0;
+    let mut last_scan = String::from("未知");
+
+    // 读取资产
+    if asset_path.exists() {
+        if let Ok(content) = fs::read_to_string(&asset_path) {
+            if let Ok(assets) = serde_json::from_str::<Vec<Asset>>(&content) {
+                total_assets = assets.len();
+                alive_assets = assets.iter().filter(|a| a.alive).count();
+                
+                // 获取最后更新时间
+                if let Ok(metadata) = fs::metadata(&asset_path) {
+                    if let Ok(modified) = metadata.modified() {
+                        if let Ok(dt) = DateTime::<Utc>::from_system_time(modified) {
+                            last_scan = dt.format("%Y-%m-%d %H:%M:%S").to_string();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 读取墓碑
+    if tombstone_path.exists() {
+        if let Ok(content) = fs::read_to_string(&tombstone_path) {
+            if let Ok(tombstones) = serde_json::from_str::<Vec<Tombstone>>(&content) {
+                total_tombstones = tombstones.len();
+                resurrected = tombstones.iter().filter(|t| t.resurrected_at.is_some()).count();
+            }
+        }
+    }
+
+    Stats {
+        total_assets,
+        alive_assets,
+        dead_assets: total_assets - alive_assets,
+        total_tombstones,
+        resurrected,
+        last_scan,
+    }
+}
+
+#[tauri::command]
+pub fn get_recent_corpses(limit: i32) -> Vec<Tombstone> {
+    let tombstone_path = get_tombstone_registry_path();
+    
+    if !tombstone_path.exists() {
+        return get_mock_corpses();
+    }
+    
+    if let Ok(content) = fs::read_to_string(&tombstone_path) {
+        if let Ok(mut tombstones) = serde_json::from_str::<Vec<Tombstone>>(&content) {
+            // 按死亡日期排序
+            tombstones.sort_by(|a, b| b.died_at.cmp(&a.died_at));
+            return tombstones.into_iter().take(limit as usize).collect();
+        }
+    }
+    
+    get_mock_corpses()
+}
+
+// 后备模拟数据
+fn get_mock_corpses() -> Vec<Tombstone> {
+    vec![
+        Tombstone {
+            id: String::from("regex-validator"),
+            name: String::from("RegEx 验证码解析器"),
+            cause_of_death: String::from("被滑块验证干掉了"),
+            epitaph: String::from("它曾经能识别99%的验证码，直到验证码学会了自我进化"),
+            tags: vec![String::from("rust"), String::from("validator")],
+            original_path: String::from("src/utils/regex-validator.ts"),
+            language: Some(String::from("Rust")),
+            line_count: 256,
+            died_at: String::from("2024-03-15T00:00:00Z"),
+            resurrected_at: None,
+            resurrected_to: None,
+        },
+        Tombstone {
+            id: String::from("vue2-admin"),
+            name: String::from("Vue 2.0 管理系统"),
+            cause_of_death: String::from("Vue 3发布了"),
+            epitaph: String::from("Composition API 永不为奴！"),
+            tags: vec![String::from("vue"), String::from("admin")],
+            original_path: String::from("packages/admin/src/main.ts"),
+            language: Some(String::from("Vue")),
+            line_count: 1542,
+            died_at: String::from("2023-01-07T00:00:00Z"),
+            resurrected_at: None,
+            resurrected_to: None,
+        },
+        Tombstone {
+            id: String::from("jquery-branch"),
+            name: String::from("JQuery 分支"),
+            cause_of_death: String::from("IE11终于死了"),
+            epitaph: String::from("RIP IE, 你终于走了"),
+            tags: vec![String::from("javascript"), String::from("jquery")],
+            original_path: String::from("src/legacy/jquery-bridge.js"),
+            language: Some(String::from("JavaScript")),
+            line_count: 892,
+            died_at: String::from("2022-06-15T00:00:00Z"),
+            resurrected_at: None,
+            resurrected_to: None,
+        },
+    ]
+}
+
+// ========== 扫描命令 ==========
+
+#[tauri::command]
+pub async fn trigger_scan() -> Result<ScanResult, String> {
+    println!("🔄 开始扫描本地墓地...");
+    
+    // 重新读取数据
+    let stats = get_stats();
+    
+    let zombies = stats.total_tombstones;
+    let scanned = stats.total_assets;
+    
+    println!("✅ 扫描完成！发现 {} 个墓碑", zombies);
+    
+    Ok(ScanResult {
+        success: true,
+        scanned,
+        zombies,
+        message: format!("扫描完成！发现 {} 个墓碑", zombies),
+    })
+}
+
+// ========== 诈尸提醒功能 ==========
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ZombieAlert {
     pub id: String,
@@ -77,300 +307,111 @@ pub struct ZombieAlerts {
     pub unread_count: usize,
 }
 
-// 获取配置文件路径
-fn get_config_path() -> PathBuf {
-    let mut path = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
+fn get_zombie_alerts_path() -> PathBuf {
+    let mut path = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
     path.push("code-corpses");
-    path.push("cemetery.config.json");
+    path.push("zombie-alerts.json");
     path
 }
 
-// 读取配置文件
 #[tauri::command]
-pub fn load_config() -> Result<Config, String> {
-    let path = get_config_path();
-    
-    if path.exists() {
-        let content = fs::read_to_string(&path)
-            .map_err(|e| format!("读取配置失败: {}", e))?;
-        serde_json::from_str(&content)
-            .map_err(|e| format!("解析配置失败: {}", e))
-    } else {
-        // 创建默认配置
-        let default_config = Config::default();
-        save_config(&default_config)?;
-        Ok(default_config)
-    }
-}
+pub fn get_zombie_alerts() -> ZombieAlerts {
+    let path = get_zombie_alerts_path();
 
-// 保存配置文件
-#[tauri::command]
-pub fn save_config(config: &Config) -> Result<(), String> {
-    let path = get_config_path();
-    
-    // 创建目录
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)
-            .map_err(|e| format!("创建配置目录失败: {}", e))?;
-    }
-    
-    let content = serde_json::to_string_pretty(config)
-        .map_err(|e| format!("序列化配置失败: {}", e))?;
-    
-    fs::write(&path, content)
-        .map_err(|e| format!("写入配置失败: {}", e))?;
-    
-    Ok(())
-}
+    if let Ok(content) = fs::read_to_string(&path) {
+        if let Ok(data) = serde_json::from_str::<serde_json::Value>(&content) {
+            let alerts: Vec<ZombieAlert> = data["alerts"]
+                .as_array()
+                .map(|arr| {
+                    arr.iter()
+                        .filter_map(|v| serde_json::from_value(v.clone()).ok())
+                        .collect()
+                })
+                .unwrap_or_default();
 
-// 更新配置
-#[tauri::command]
-pub fn update_github_token(token: String) -> Result<(), String> {
-    let mut config = load_config()?;
-    config.github_token = Some(token);
-    save_config(&config)
-}
+            let unread_count = alerts.iter().filter(|a| !a.notified).count();
 
-// 获取 GitHub API 客户端
-async fn get_github_client(config: &Config) -> Result<octocrab::Octocrab, String> {
-    let builder = octocrab::Octocrab::builder();
-    
-    if let Some(token) = &config.github_token {
-        builder.personal_token(token.clone())
-    } else {
-        builder
-    }
-    .build()
-    .map_err(|e| format!("创建 GitHub 客户端失败: {}", e))
-}
-
-// 扫描 GitHub 仓库获取诈尸项目
-#[tauri::command]
-pub async fn trigger_scan() -> Result<ScanResult, String> {
-    println!("🔄 开始扫描 GitHub 墓地...");
-    
-    let config = load_config()?;
-    let octocrab = get_github_client(&config).await?;
-    
-    let org = config.target_org.clone();
-    let mut zombies_count = 0;
-    let mut scanned_count = 0;
-    let mut tombstone_list = Vec::new();
-    
-    // 获取组织下的仓库
-    let repos: Result<Vec<_>, _> = octocrab
-        .orgs(&org)
-        .list_repos()
-        .type_("all")
-        .per_page(100)
-        .send()
-        .await
-        .map_err(|e| format!("获取仓库列表失败: {}", e))?
-        .collect();
-    
-    let repos = repos.map_err(|e| format!("收集仓库失败: {}", e))?;
-    
-    let six_months_ago = Utc::now() - Duration::days(180);
-    
-    for repo in repos {
-        scanned_count += 1;
-        let updated = repo.updated_at.unwrap_or_else(|| Utc::now());
-        
-        // 检测诈尸：6个月以上无活动
-        if updated < six_months_ago && repo.stargazers_count > 0 {
-            zombies_count += 1;
-            
-            let tombstone = Tombstone {
-                id: repo.id.to_string(),
-                name: repo.full_name.clone(),
-                cause: format!("已 {} 天无更新", (Utc::now() - updated).num_days()),
-                age: format!("⭐ {}", repo.stargazers_count),
-                date: updated.format("%Y-%m-%d").to_string(),
-                killer: "时间".to_string(),
-                repo_url: repo.html_url,
-                stars: repo.stargazers_count,
-                language: repo.language.unwrap_or_else(|| "Unknown".to_string()),
-                last_activity: updated.format("%Y-%m-%d %H:%M:%S").to_string(),
+            return ZombieAlerts {
+                alerts,
+                last_check: data["last_check"].as_str().unwrap_or("从未检查").to_string(),
+                total_alerts: alerts.len(),
+                unread_count,
             };
-            
-            tombstone_list.push(tombstone);
-            
-            // 保存到墓碑列表
-            save_tombstone(&tombstone)?;
         }
     }
-    
-    // 保存统计信息
-    save_stats(scanned_count, zombies_count)?;
-    
-    println!("✅ 扫描完成！发现 {} 个诈尸项目", zombies_count);
-    
-    Ok(ScanResult {
-        success: true,
-        scanned: scanned_count,
-        zombies: zombies_count,
-        message: format!("扫描完成！发现 {} 个诈尸项目", zombies_count),
-    })
+
+    ZombieAlerts {
+        alerts: vec![],
+        last_check: String::from("从未检查"),
+        total_alerts: 0,
+        unread_count: 0,
+    }
 }
 
-// 保存墓碑数据
-fn save_tombstone(tombstone: &Tombstone) -> Result<(), String> {
-    let mut data_dir = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
-    data_dir.push("code-corpses");
-    fs::create_dir_all(&data_dir).ok();
-    
-    let mut tombs_path = data_dir.clone();
-    tombs_path.push("tombstones.json");
-    
-    let mut tombstones: Vec<Tombstone> = if tombs_path.exists() {
-        let content = fs::read_to_string(&tombs_path)
-            .map_err(|e| e.to_string())?;
-        serde_json::from_str(&content).unwrap_or_default()
-    } else {
-        Vec::new()
-    };
-    
-    // 添加新墓碑，去重
-    tombstones.retain(|t| t.id != tombstone.id);
-    tombstones.insert(0, tombstone.clone());
-    
-    // 只保留前100个
-    tombstones.truncate(100);
-    
-    let content = serde_json::to_string_pretty(&tombstones)
-        .map_err(|e| e.to_string())?;
-    
-    fs::write(&tombs_path, content)
-        .map_err(|e| e.to_string())?;
-    
-    Ok(())
-}
-
-// 保存统计数据
-fn save_stats(total: usize, zombies: usize) -> Result<(), String> {
-    let mut data_dir = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
-    data_dir.push("code-corpses");
-    fs::create_dir_all(&data_dir).ok();
-    
-    let mut stats_path = data_dir.clone();
-    stats_path.push("stats.json");
-    
-    let stats = serde_json::json!({
-        "total": total,
-        "zombies": zombies,
-        "last_scan": Utc::now().to_rfc3339(),
-    });
-    
-    fs::write(&stats_path, serde_json::to_string_pretty(&stats).unwrap())
-        .map_err(|e| e.to_string())?;
-    
-    Ok(())
-}
-
-// 读取统计数据
 #[tauri::command]
-pub fn get_stats() -> Stats {
-    let mut data_dir = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
-    data_dir.push("code-corpses");
-    data_dir.push("stats.json");
+pub fn mark_alert_read(alert_id: String) -> Result<(), String> {
+    let path = get_zombie_alerts_path();
     
-    if data_dir.exists() {
-        if let Ok(content) = fs::read_to_string(&data_dir) {
-            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
-                return Stats {
-                    total: json.get("total").and_then(|v| v.as_u64()).unwrap_or(0) as usize,
-                    zombies: json.get("zombies").and_then(|v| v.as_u64()).unwrap_or(0) as usize,
-                    last_scan: json.get("last_scan")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("从未扫描")
-                        .to_string(),
-                };
+    if !path.exists() {
+        return Ok(());
+    }
+    
+    let content = fs::read_to_string(&path)
+        .map_err(|e| e.to_string())?;
+    
+    let mut data: serde_json::Value = serde_json::from_str(&content)
+        .map_err(|e| e.to_string())?;
+    
+    if let Some(alerts) = data["alerts"].as_array_mut() {
+        for alert in alerts {
+            if alert["id"] == alert_id {
+                alert["notified"] = serde_json::json!(true);
+                break;
             }
         }
     }
     
-    Stats {
-        total: 0,
-        zombies: 0,
-        last_scan: "从未扫描".to_string(),
-    }
-}
-
-// 读取墓碑列表
-#[tauri::command]
-pub fn get_recent_corpses(limit: i32) -> Vec<Tombstone> {
-    let mut data_dir = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
-    data_dir.push("code-corpses");
-    data_dir.push("tombstones.json");
+    fs::write(&path, serde_json::to_string_pretty(&data).unwrap())
+        .map_err(|e| e.to_string())?;
     
-    if let Ok(content) = fs::read_to_string(&data_dir) {
-        if let Ok(tombstones) = serde_json::from_str::<Vec<Tombstone>>(&content) {
-            return tombstones.into_iter().take(limit as usize).collect();
-        }
-    }
-    
-    // 返回模拟数据作为后备
-    vec![
-        Tombstone {
-            id: "regex-validator".to_string(),
-            name: "RegEx 验证码解析器".to_string(),
-            cause: "被滑块验证干掉了".to_string(),
-            age: "2周".to_string(),
-            date: "2024-03-15".to_string(),
-            killer: "前端Peter".to_string(),
-            repo_url: "https://github.com".to_string(),
-            stars: 128,
-            language: "Rust",
-            last_activity: "2024-03-15".to_string(),
-        },
-        Tombstone {
-            id: "vue2-admin".to_string(),
-            name: "Vue 2.0 管理系统".to_string(),
-            cause: "Vue 3发布了".to_string(),
-            age: "8个月".to_string(),
-            date: "2023-01-07".to_string(),
-            killer: "尤雨溪".to_string(),
-            repo_url: "https://github.com".to_string(),
-            stars: 892,
-            language: "Vue",
-            last_activity: "2023-01-07".to_string(),
-        },
-        Tombstone {
-            id: "jquery-branch".to_string(),
-            name: "JQuery 分支".to_string(),
-            cause: "IE11终于死了".to_string(),
-            age: "12年".to_string(),
-            date: "2022-06-15".to_string(),
-            killer: "微软自己".to_string(),
-            repo_url: "https://github.com".to_string(),
-            stars: 3421,
-            language: "JavaScript",
-            last_activity: "2022-06-15".to_string(),
-        },
-    ]
+    Ok(())
 }
 
 #[tauri::command]
-pub async fn send_report() -> Result<String, String> {
-    // TODO: 实现 Telegram/Discord 报告发送
-    println!("📤 准备发送报告...");
+pub fn clear_all_alerts() -> Result<(), String> {
+    let alerts_data = ZombieAlerts {
+        alerts: vec![],
+        last_check: Utc::now().to_rfc3339(),
+        total_alerts: 0,
+        unread_count: 0,
+    };
     
-    let stats = get_stats();
-    let corpses = get_recent_corpses(10);
+    let path = get_zombie_alerts_path();
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).ok();
+    }
     
-    // 发送通知
-    tauri::WebviewWindowBuilder::new(
-        &tauri::WindowUrl::App("index.html".into()),
-        tauri::WebviewWindowAttributes::new()
-            .title("报告已生成")
-            .inner_size(300.0, 200.0),
-    )
-    .map_err(|e| e.to_string())?;
+    let content = serde_json::to_string_pretty(&alerts_data)
+        .map_err(|e| e.to_string())?;
     
-    Ok(format!("报告已生成！共 {} 个墓碑，{} 个诈尸项目", stats.total, stats.zombies))
+    fs::write(&path, content)
+        .map_err(|e| e.to_string())?;
+    
+    Ok(())
 }
 
-// 设置开机自启
+// ========== 实用命令 ==========
+
+#[tauri::command]
+pub fn log_message(message: String) {
+    println!("{}", message);
+}
+
+#[tauri::command]
+pub fn get_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
 #[tauri::command]
 pub fn set_autostart(enabled: bool) -> Result<(), String> {
     #[cfg(target_os = "macos")]
@@ -382,7 +423,6 @@ pub fn set_autostart(enabled: bool) -> Result<(), String> {
             .into_owned();
         
         if enabled {
-            // 添加登录项
             let script = format!(
                 r#"tell application "System Events" to make login item at end with properties {{path: "{}", name: "Code Corpses", hidden: false}}"#,
                 app_path
@@ -392,12 +432,11 @@ pub fn set_autostart(enabled: bool) -> Result<(), String> {
                 .output()
                 .map_err(|e| e.to_string())?;
         } else {
-            // 移除登录项
             let script = r#"tell application "System Events" to delete login item "Code Corpses""#;
             Command::new("osascript")
                 .args(&["-e", script])
                 .output()
-                .ok(); // 忽略错误（可能不存在）
+                .ok();
         }
     }
     
@@ -427,200 +466,23 @@ pub fn set_autostart(enabled: bool) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn log_message(message: String) {
-    println!("{}", message);
-}
-
-#[tauri::command]
-pub fn get_version() -> String {
-    env!("CARGO_PKG_VERSION").to_string()
-}
-
-// ========== 🧟 诈尸提醒功能 ==========
-
-// 获取诈尸提醒数据文件路径
-fn get_zombie_alerts_path() -> PathBuf {
-    let mut path = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
-    path.push("code-corpses");
-    path.push("zombie-alerts.json");
-    path
-}
-
-// 获取诈尸提醒
-#[tauri::command]
-pub fn get_zombie_alerts() -> ZombieAlerts {
-    let path = get_zombie_alerts_path();
-
-    if let Ok(content) = fs::read_to_string(&path) {
-        if let Ok(data) = serde_json::from_str::<serde_json::Value>(&content) {
-            let alerts: Vec<ZombieAlert> = data["alerts"]
-                .as_array()
-                .map(|arr| {
-                    arr.iter()
-                        .filter_map(|v| serde_json::from_value(v.clone()).ok())
-                        .collect()
-                })
-                .unwrap_or_default();
-
-            let unread_count = alerts.iter().filter(|a| !a.notified).count();
-
-            return ZombieAlerts {
-                alerts,
-                last_check: data["last_check"].as_str().unwrap_or("从未检查").to_string(),
-                total_alerts: alerts.len(),
-                unread_count,
-            };
-        }
-    }
-
-    // 返回默认空提醒
-    ZombieAlerts {
-        alerts: vec![],
-        last_check: "从未检查".to_string(),
-        total_alerts: 0,
-        unread_count: 0,
-    }
-}
-
-// 添加诈尸提醒
-#[tauri::command]
-pub fn add_zombie_alert(
-    corpse_repo: String,
-    corpse_path: String,
-    zombie_repo: String,
-    zombie_path: String,
-    similarity: f64,
-    resurrection_type: String,
-    confidence: f64,
-) -> Result<ZombieAlert, String> {
-    let alert = ZombieAlert {
-        id: format!("{}-{}", corpse_repo.replace('/', "-), chrono::Utc::now().timestamp()),
-        corpse_repo,
-        corpse_path,
-        zombie_repo,
-        zombie_path,
-        similarity,
-        resurrection_type,
-        confidence,
-        detected_at: chrono::Utc::now().to_rfc3339(),
-        notified: false,
-    };
-
-    let mut alerts_data = get_zombie_alerts();
-    alerts_data.alerts.insert(0, alert.clone());
-    alerts_data.last_check = chrono::Utc::now().to_rfc3339();
-    alerts_data.total_alerts = alerts_data.alerts.len();
-    alerts_data.unread_count += 1;
-
-    save_zombie_alerts(&alerts_data)?;
-
-    // 发送系统通知
-    send_zombie_notification(&alert)?;
-
-    Ok(alert)
-}
-
-// 标记提醒为已读
-#[tauri::command]
-pub fn mark_alert_read(alert_id: String) -> Result<(), String> {
-    let mut alerts_data = get_zombie_alerts();
-
-    if let Some(alert) = alerts_data.alerts.iter_mut().find(|a| a.id == alert_id) {
-        alert.notified = true;
-        alerts_data.unread_count = alerts_data.alerts.iter().filter(|a| !a.notified).count();
-        save_zombie_alerts(&alerts_data)?;
-    }
-
-    Ok(())
-}
-
-// 清除所有提醒
-#[tauri::command]
-pub fn clear_all_alerts() -> Result<(), String> {
-    let alerts_data = ZombieAlerts {
-        alerts: vec![],
-        last_check: chrono::Utc::now().to_rfc3339(),
-        total_alerts: 0,
-        unread_count: 0,
-    };
-    save_zombie_alerts(&alerts_data)
-}
-
-// 保存诈尸提醒数据
-fn save_zombie_alerts(alerts: &ZombieAlerts) -> Result<(), String> {
-    let path = get_zombie_alerts_path();
-
-    // 创建目录
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)
-            .map_err(|e| format!("创建目录失败: {}", e))?;
-    }
-
-    let content = serde_json::to_string_pretty(alerts)
-        .map_err(|e| format!("序列化失败: {}", e))?;
-
-    fs::write(&path, content)
-        .map_err(|e| format!("写入失败: {}", e))?;
-
-    Ok(())
-}
-
-// 发送诈尸通知
-fn send_zombie_notification(alert: &ZombieAlert) -> Result<(), String> {
-    // 构建通知消息
-    let title = "🧟 诈尸警告！";
-    let body = format!(
-        "发现代码诈尸！\n墓地: {}\n复活地点: {}\n相似度: {:.1}%",
-        alert.corpse_path, alert.zombie_path, alert.similarity * 100.0
+pub async fn send_report() -> Result<String, String> {
+    let stats = get_stats();
+    let corpses = get_recent_corpses(10);
+    
+    let message = format!(
+        "📊 代码墓地报告\n\n资产: {} (存活: {}, 死亡: {})\n墓碑: {} (复活: {})",
+        stats.total_assets,
+        stats.alive_assets,
+        stats.dead_assets,
+        stats.total_tombstones,
+        stats.resurrected
     );
-
-    // 这里可以调用 Tauri 的通知 API
-    // 暂时只打印到控制台
-    println!("🧟 诈尸通知:");
-    println!("  标题: {}", title);
-    println!("  内容: {}", body);
-    println!("  时间: {}", alert.detected_at);
-
-    Ok(())
+    
+    Ok(message)
 }
 
-// 检测诈尸（模拟功能）
-#[tauri::command]
-pub async fn check_zombie_resurrection(target_repo: String) -> Result<ZombieAlerts, String> {
-    println!("🧟 开始检测诈尸: {}", target_repo);
-
-    // 模拟检测过程
-    // 在实际应用中，这里应该调用 enhanced-zombie.ts 的检测逻辑
-
-    let mut alerts_data = get_zombie_alerts();
-    alerts_data.last_check = chrono::Utc::now().to_rfc3339();
-
-    // 模拟发现诈尸（10% 概率）
-    if rand::random::<f64>() < 0.1 {
-        let alert = ZombieAlert {
-            id: format!("demo-{}", chrono::Utc::now().timestamp()),
-            corpse_repo: "old-project".to_string(),
-            corpse_path: "src/utils/regex.ts".to_string(),
-            zombie_repo: target_repo.clone(),
-            zombie_path: "packages/core/src/regex.ts".to_string(),
-            similarity: 0.85,
-            resurrection_type: "🔄 完全克隆".to_string(),
-            confidence: 0.8,
-            detected_at: chrono::Utc::now().to_rfc3339(),
-            notified: false,
-        };
-
-        alerts_data.alerts.insert(0, alert);
-        alerts_data.total_alerts = alerts_data.alerts.len();
-        alerts_data.unread_count += 1;
-
-        save_zombie_alerts(&alerts_data)?;
-
-        send_zombie_notification(&alerts_data.alerts[0])?;
-    }
-
-    Ok(alerts_data)
-}
+// ========== 主入口 ==========
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -640,10 +502,8 @@ pub fn run() {
             log_message,
             get_version,
             get_zombie_alerts,
-            add_zombie_alert,
             mark_alert_read,
-            clear_all_alerts,
-            check_zombie_resurrection
+            clear_all_alerts
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

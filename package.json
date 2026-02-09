@@ -19,7 +19,11 @@
     "search": "npx ts-node src/cemetery-search.ts",
     "help": "npx ts-node src/index.ts --help",
     "build": "tsc",
-    "dev": "ts-node-dev --respawn src/index.ts"
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "serve:api": "npx ts-node src/cli.ts serve api --port=3000",
+    "serve:mcp": "npx ts-node src/cli.ts serve mcp --port=3001",
+    "analyze": "npx ts-node src/cli.ts analyze",
+    "index": "npx ts-node src/cli.ts index"
   },
   "keywords": [
     "code-corpses",
@@ -45,10 +49,13 @@
   "homepage": "https://github.com/Zhifeng-Niu/programmer-corpses#readme",
   "changelog": "https://github.com/Zhifeng-Niu/programmer-corpses/blob/main/CHANGELOG.md",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@octokit/rest": "^20.0.2",
+    "express": "^5.2.1",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.10.0",
     "ts-node": "^10.9.2",
