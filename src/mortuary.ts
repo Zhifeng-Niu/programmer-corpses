@@ -36,7 +36,7 @@ interface CorpsePackage {
   files: string[]
 }
 
-class CodeMortuary {
+export class CodeMortuary {
   private octokit: Octokit
   private config: MortuaryConfig
   private cemetery_repo: string[]
@@ -61,19 +61,25 @@ class CodeMortuary {
     filePaths: string[],
     deathReason: string
   ): Promise<string> {
-    const report = []
+    interface PushMeta {
+      original_repo: string
+      original_path: string
+      death_reason: string
+      death_date: string
+    }
 
     // 1. 读取代码内容
     const files = await this.readFiles(repo, filePaths)
     
     // 2. 存入墓地仓库
     const corpseId = `${repo}-${Date.now()}`
-    await this.pushToCemetery(corpseId, files, {
+    const pushMeta: PushMeta = {
       original_repo: repo,
       original_path: filePaths.join(', '),
       death_reason: deathReason,
       death_date: new Date().toISOString(),
-    })
+    }
+    await this.pushToCemetery(corpseId, files, pushMeta)
 
     // 3. 生成墓碑
     const tombstone = this.generateTombstone({
@@ -81,7 +87,8 @@ class CodeMortuary {
       original_repo: repo,
       original_path: filePaths.join(', '),
       death_reason: deathReason,
-      death_date: new Date().toISOString(),
+      death_date: pushMeta.death_date,
+      tombstone: '',
       files: filePaths
     })
 
@@ -167,8 +174,8 @@ class CodeMortuary {
 
   // ========== 私有方法 ==========
 
-  private async readFiles(repo: string, paths: string[]) {
-    const files = []
+  private async readFiles(repo: string, paths: string[]): Promise<{ name: string; content: string }[]> {
+    const files: { name: string; content: string }[] = []
     for (const p of paths) {
       try {
         const { data } = await this.octokit.repos.getContent({
@@ -239,7 +246,7 @@ class CodeMortuary {
     }
   }
 
-  private async readFromCemetery(corpseId: string) {
+  private async readFromCemetery(corpseId: string): Promise<{ name: string; content: string }[]> {
     return []
   }
 
@@ -313,4 +320,7 @@ async function main() {
   }
 }
 
-main().catch(console.error)
+// 只在直接运行时执行 CLI
+if (require.main === module) {
+  main().catch(console.error)
+}

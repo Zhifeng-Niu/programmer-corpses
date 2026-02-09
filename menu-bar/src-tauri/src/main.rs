@@ -4,11 +4,9 @@ use serde::{Serialize, Deserialize};
 use std::fs;
 use std::path::PathBuf;
 use chrono::{DateTime, Utc, Duration};
-use std::collections::HashMap;
 
 // 配置文件结构
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Config {
     pub github_token: Option<String>,
     pub target_org: String,
     pub scan_interval: u64,
@@ -54,6 +52,29 @@ pub struct ScanResult {
     pub scanned: usize,
     pub zombies: usize,
     pub message: String,
+}
+
+// 🧟 诈尸提醒
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ZombieAlert {
+    pub id: String,
+    pub corpse_repo: String,
+    pub corpse_path: String,
+    pub zombie_repo: String,
+    pub zombie_path: String,
+    pub similarity: f64,
+    pub resurrection_type: String,
+    pub confidence: f64,
+    pub detected_at: String,
+    pub notified: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ZombieAlerts {
+    pub alerts: Vec<ZombieAlert>,
+    pub last_check: String,
+    pub total_alerts: usize,
+    pub unread_count: usize,
 }
 
 // 获取配置文件路径
@@ -415,6 +436,192 @@ pub fn get_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
 }
 
+// ========== 🧟 诈尸提醒功能 ==========
+
+// 获取诈尸提醒数据文件路径
+fn get_zombie_alerts_path() -> PathBuf {
+    let mut path = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
+    path.push("code-corpses");
+    path.push("zombie-alerts.json");
+    path
+}
+
+// 获取诈尸提醒
+#[tauri::command]
+pub fn get_zombie_alerts() -> ZombieAlerts {
+    let path = get_zombie_alerts_path();
+
+    if let Ok(content) = fs::read_to_string(&path) {
+        if let Ok(data) = serde_json::from_str::<serde_json::Value>(&content) {
+            let alerts: Vec<ZombieAlert> = data["alerts"]
+                .as_array()
+                .map(|arr| {
+                    arr.iter()
+                        .filter_map(|v| serde_json::from_value(v.clone()).ok())
+                        .collect()
+                })
+                .unwrap_or_default();
+
+            let unread_count = alerts.iter().filter(|a| !a.notified).count();
+
+            return ZombieAlerts {
+                alerts,
+                last_check: data["last_check"].as_str().unwrap_or("从未检查").to_string(),
+                total_alerts: alerts.len(),
+                unread_count,
+            };
+        }
+    }
+
+    // 返回默认空提醒
+    ZombieAlerts {
+        alerts: vec![],
+        last_check: "从未检查".to_string(),
+        total_alerts: 0,
+        unread_count: 0,
+    }
+}
+
+// 添加诈尸提醒
+#[tauri::command]
+pub fn add_zombie_alert(
+    corpse_repo: String,
+    corpse_path: String,
+    zombie_repo: String,
+    zombie_path: String,
+    similarity: f64,
+    resurrection_type: String,
+    confidence: f64,
+) -> Result<ZombieAlert, String> {
+    let alert = ZombieAlert {
+        id: format!("{}-{}", corpse_repo.replace('/', "-), chrono::Utc::now().timestamp()),
+        corpse_repo,
+        corpse_path,
+        zombie_repo,
+        zombie_path,
+        similarity,
+        resurrection_type,
+        confidence,
+        detected_at: chrono::Utc::now().to_rfc3339(),
+        notified: false,
+    };
+
+    let mut alerts_data = get_zombie_alerts();
+    alerts_data.alerts.insert(0, alert.clone());
+    alerts_data.last_check = chrono::Utc::now().to_rfc3339();
+    alerts_data.total_alerts = alerts_data.alerts.len();
+    alerts_data.unread_count += 1;
+
+    save_zombie_alerts(&alerts_data)?;
+
+    // 发送系统通知
+    send_zombie_notification(&alert)?;
+
+    Ok(alert)
+}
+
+// 标记提醒为已读
+#[tauri::command]
+pub fn mark_alert_read(alert_id: String) -> Result<(), String> {
+    let mut alerts_data = get_zombie_alerts();
+
+    if let Some(alert) = alerts_data.alerts.iter_mut().find(|a| a.id == alert_id) {
+        alert.notified = true;
+        alerts_data.unread_count = alerts_data.alerts.iter().filter(|a| !a.notified).count();
+        save_zombie_alerts(&alerts_data)?;
+    }
+
+    Ok(())
+}
+
+// 清除所有提醒
+#[tauri::command]
+pub fn clear_all_alerts() -> Result<(), String> {
+    let alerts_data = ZombieAlerts {
+        alerts: vec![],
+        last_check: chrono::Utc::now().to_rfc3339(),
+        total_alerts: 0,
+        unread_count: 0,
+    };
+    save_zombie_alerts(&alerts_data)
+}
+
+// 保存诈尸提醒数据
+fn save_zombie_alerts(alerts: &ZombieAlerts) -> Result<(), String> {
+    let path = get_zombie_alerts_path();
+
+    // 创建目录
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("创建目录失败: {}", e))?;
+    }
+
+    let content = serde_json::to_string_pretty(alerts)
+        .map_err(|e| format!("序列化失败: {}", e))?;
+
+    fs::write(&path, content)
+        .map_err(|e| format!("写入失败: {}", e))?;
+
+    Ok(())
+}
+
+// 发送诈尸通知
+fn send_zombie_notification(alert: &ZombieAlert) -> Result<(), String> {
+    // 构建通知消息
+    let title = "🧟 诈尸警告！";
+    let body = format!(
+        "发现代码诈尸！\n墓地: {}\n复活地点: {}\n相似度: {:.1}%",
+        alert.corpse_path, alert.zombie_path, alert.similarity * 100.0
+    );
+
+    // 这里可以调用 Tauri 的通知 API
+    // 暂时只打印到控制台
+    println!("🧟 诈尸通知:");
+    println!("  标题: {}", title);
+    println!("  内容: {}", body);
+    println!("  时间: {}", alert.detected_at);
+
+    Ok(())
+}
+
+// 检测诈尸（模拟功能）
+#[tauri::command]
+pub async fn check_zombie_resurrection(target_repo: String) -> Result<ZombieAlerts, String> {
+    println!("🧟 开始检测诈尸: {}", target_repo);
+
+    // 模拟检测过程
+    // 在实际应用中，这里应该调用 enhanced-zombie.ts 的检测逻辑
+
+    let mut alerts_data = get_zombie_alerts();
+    alerts_data.last_check = chrono::Utc::now().to_rfc3339();
+
+    // 模拟发现诈尸（10% 概率）
+    if rand::random::<f64>() < 0.1 {
+        let alert = ZombieAlert {
+            id: format!("demo-{}", chrono::Utc::now().timestamp()),
+            corpse_repo: "old-project".to_string(),
+            corpse_path: "src/utils/regex.ts".to_string(),
+            zombie_repo: target_repo.clone(),
+            zombie_path: "packages/core/src/regex.ts".to_string(),
+            similarity: 0.85,
+            resurrection_type: "🔄 完全克隆".to_string(),
+            confidence: 0.8,
+            detected_at: chrono::Utc::now().to_rfc3339(),
+            notified: false,
+        };
+
+        alerts_data.alerts.insert(0, alert);
+        alerts_data.total_alerts = alerts_data.alerts.len();
+        alerts_data.unread_count += 1;
+
+        save_zombie_alerts(&alerts_data)?;
+
+        send_zombie_notification(&alerts_data.alerts[0])?;
+    }
+
+    Ok(alerts_data)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -431,7 +638,12 @@ pub fn run() {
             update_github_token,
             set_autostart,
             log_message,
-            get_version
+            get_version,
+            get_zombie_alerts,
+            add_zombie_alert,
+            mark_alert_read,
+            clear_all_alerts,
+            check_zombie_resurrection
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

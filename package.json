@@ -14,6 +14,9 @@
     "anniversary": "npx ts-node src/index.ts --anniversary",
     "scan": "npx ts-node src/scanner.ts --scan",
     "detect": "npx ts-node src/zombie.ts --detect",
+    "enhanced-detect": "npx ts-node src/enhanced-zombie.ts scan",
+    "tombstone": "npx ts-node src/tombstone-generator.ts",
+    "search": "npx ts-node src/cemetery-search.ts",
     "help": "npx ts-node src/index.ts --help",
     "build": "tsc",
     "dev": "ts-node-dev --respawn src/index.ts"

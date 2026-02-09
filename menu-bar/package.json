@@ -9,5 +9,12 @@
   },
   "keywords": ["tauri", "menubar", "github", "monitor"],
   "author": "Zhifeng-Niu",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@tauri-apps/api": "^2"
+  },
+  "devDependencies": {
+    "vite": "^5",
+    "typescript": "^5"
+  }
 }
