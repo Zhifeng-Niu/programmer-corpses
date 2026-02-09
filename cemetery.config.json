@@ -1,0 +1,124 @@
+{
+  "$schema": "cemetery.config.schema.json",
+  "version": "3.0.0",
+  "name": "My Code Cemetery",
+  "description": "Code Corpses Configuration - Human Off the Loop Mode",
+  
+  "autoScan": {
+    "enabled": true,
+    "interval": 86400,
+    "paths": [
+      {
+        "path": "./src",
+        "name": "Main Source",
+        "autoIndex": true,
+        "interval": 3600
+      },
+      {
+        "path": "./lib",
+        "name": "Libraries",
+        "autoIndex": true,
+        "extensions": [".ts", ".js", ".py"]
+      },
+      {
+        "path": "/Users/me/projects",
+        "name": "My Projects",
+        "autoIndex": true
+      }
+    ],
+    "github": [
+      {
+        "repo": "owner/repo-name",
+        "name": "Project Name",
+        "autoIndex": true,
+        "branch": "main"
+      }
+    ],
+    "deadThresholdDays": 90,
+    "autoTombstone": true
+  },
+
+  "notification": {
+    "channel": "telegram",
+    "digest": true,
+    "quietMode": true,
+    "events": {
+      "newAssets": true,
+      "deadAssets": true,
+      "newTombstones": true,
+      "resurrections": true,
+      "weeklyReport": true,
+      "scanErrors": true
+    }
+  },
+
+  "github": {
+    "token": "ghp_xxxxxxxxxxxx",
+    "owner": "your-username",
+    "repos": [
+      "my-project",
+      "old-app",
+      "experiment-repo"
+    ],
+    "exclude": [
+      "archived-repo",
+      "private-repo"
+    ],
+    "excludePatterns": [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "*.test.ts",
+      "*.spec.ts"
+    ]
+  },
+
+  "scanner": {
+    "thresholdDays": 90,
+    "autoArchive": false,
+    "fileExtensions": [
+      ".ts", ".tsx", ".js", ".jsx", ".py", ".go", ".rs", 
+      ".java", ".cpp", ".c", ".swift", ".kt", ".rb", ".php"
+    ],
+    "ignoreDirs": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build",
+      "out",
+      ".next",
+      ".nuxt",
+      "__pycache__",
+      ".cache",
+      "vendor",
+      "target",
+      "coverage",
+      ".cemetery"
+    ]
+  },
+
+  "dashboard": {
+    "outputPath": "./DASHBOARD.md",
+    "includeTrends": true,
+    "includeAssets": true,
+    "includeTombstones": true,
+    "trendPeriod": {
+      "newSince": "7d",
+      "diedSince": "30d",
+      "resurrectedSince": "30d"
+    }
+  },
+
+  "vibe": {
+    "epitaphStyle": "funny",
+    "enableEasterEggs": true,
+    "happyMode": true,
+    "language": "zh-CN"
+  },
+
+  "agentRules": {
+    "askBeforeReuse": true,
+    "addResurrectionComment": true,
+    "resurrectionCommentTemplate": "# 🧟 此代码诈尸了！\n# 来自墓地: {repo}/{path}\n# 原死亡日期: {deathDate}\n# 复活日期: {today}"
+  }
+}

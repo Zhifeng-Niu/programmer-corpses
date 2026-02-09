@@ -1,0 +1,17 @@
+[
+  {
+    "id": "tomb-358eb461",
+    "name": "old-file.js",
+    "causeOfDeath": "deprecated",
+    "epitaph": "曾经辉煌一时，如今只剩 @deprecated 标记",
+    "tags": [
+      "old-file"
+    ],
+    "summary": "old-file.js",
+    "originalPath": "./src/old-file.js",
+    "language": "JavaScript",
+    "lineCount": 0,
+    "createdAt": "2026-02-09T03:58:44.002Z",
+    "diedAt": "2026-02-09T03:58:44.002Z"
+  }
+]
